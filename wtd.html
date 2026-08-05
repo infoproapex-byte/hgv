@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WTD Tracker — RoadTalk</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <a href="/index.html" class="wtd-back">&larr; Back to RoadTalk</a>
+    <h1>WTD <span>TRACKER</span></h1>
+    <p class="subtitle">Manual shift &amp; break reminders</p>
+  </header>
+
+  <div class="wtd-week-card">
+    <div class="wtd-label">Reduced rests this week (9&ndash;10h rest, max 3)</div>
+    <div class="wtd-week-count"><span id="reducedCount">0</span><span class="wtd-week-count-max">/3</span></div>
+    <div class="wtd-week-hint" id="weekHint">Week resets Monday 00:00</div>
+  </div>
+
+  <div class="wtd-resttype-row" id="restTypeRow">
+    <div class="wtd-label">Rest taken before this shift</div>
+    <div class="wtd-resttype-buttons">
+      <button class="wtd-resttype-btn on" id="restRegularBtn" data-type="regular">Regular (11h+)<br><span>13h max</span></button>
+      <button class="wtd-resttype-btn" id="restReducedBtn" data-type="reduced">Reduced (9&ndash;10h)<br><span>15h max</span></button>
+    </div>
+    <div class="wtd-resttype-warn hidden" id="restTypeWarn">You've already used all 3 reduced rests this week &mdash; this one will need compensating within 3 weeks.</div>
+  </div>
+
+  <div class="wtd-start-row" id="startRow">
+    <div>
+      <div class="wtd-label">Shift start time</div>
+      <div class="wtd-time-picker" id="timePicker">
+        <div class="wtd-time-picker-highlight"></div>
+        <div class="wtd-time-col" id="hourCol"></div>
+        <div class="wtd-time-sep">:</div>
+        <div class="wtd-time-col" id="minuteCol"></div>
+      </div>
+    </div>
+    <button class="wtd-primary-btn start" id="mainBtn">Start work</button>
+  </div>
+
+  <div class="wtd-shift-card hidden" id="shiftCard">
+    <div class="wtd-label">Shift spread (since <span id="shiftStartLabel">—</span>)</div>
+    <div class="wtd-shift-time" id="shiftTime">00:00:00</div>
+    <div class="wtd-shift-sub">
+      <span><span id="dailyLimitLabel">13</span>h limit in <b id="dailyRemaining">13:00</b></span>
+      <span>Breaks <b id="shiftBreaksTotal">0 min</b></span>
+    </div>
+    <div class="wtd-daily-msg ok" id="dailyMessage">Plenty of time left before your daily limit.</div>
+  </div>
+
+  <div class="wtd-card hidden" id="wtdCard">
+    <div class="wtd-ring-wrap">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle class="wtd-ring-bg" cx="44" cy="44" r="38"></circle>
+        <circle class="wtd-ring-fg" id="ringFg" cx="44" cy="44" r="38"
+          stroke-dasharray="238.76" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="wtd-ring-center">
+        <div class="wtd-ring-val" id="wtdRemaining">6:00</div>
+        <div class="wtd-ring-unit">left</div>
+      </div>
+    </div>
+    <div class="wtd-info">
+      <div class="wtd-label">Break needed within 6 hrs of work</div>
+      <div class="wtd-msg ok" id="wtdMessage">Working time under monitoring.</div>
+    </div>
+  </div>
+
+  <button class="wtd-primary-btn break-start hidden" id="breakBtn">Start break</button>
+
+  <div class="wtd-log-title hidden" id="logTitle">Today's break log</div>
+  <div id="logList">
+    <div class="wtd-empty-log hidden" id="emptyLog">No breaks logged yet.</div>
+  </div>
+
+  <button class="wtd-endshift-btn hidden" id="endShiftBtn">End shift &amp; reset</button>
+
+</div>
+<script src="/wtd.js"></script>
+</body>
+</html>
