@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RoadTalk</title>
+<meta name="theme-color" content="#10161d">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RoadTalk">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <h1>ROAD<span>TALK</span></h1>
+    <p class="subtitle">Live voice channel for drivers</p>
+  </header>
+
+  <button class="routes-btn" id="routesBtn" type="button">
+    <svg class="routes-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3" opacity="0.5"/>
+      <path d="M24 12v12l8 5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>WTD Tracker</span>
+  </button>
+
+  <div class="server-box">
+    <label for="serverUrl">Server address</label>
+    <input type="text" id="serverUrl" placeholder="wss://your-server.onrender.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p class="server-hint">Enter the signaling server address once — it's saved on this device.</p>
+  </div>
+
+  <button class="join-btn" id="joinBtn" type="button">Join channel</button>
+  <p class="pick-hint" id="pickHint">Enter your server address, then tap Join channel.</p>
+
+  <div class="room hidden" id="room">
+    <div class="room-head">
+      <span class="channel-dot" id="channelDot"></span>
+      <h2 id="roomTitle">RoadTalk</h2>
+      <span class="status" id="statusText">Ready</span>
+    </div>
+
+    <div class="participants" id="participants">
+      <p class="empty-hint" id="emptyHint">Waiting for other drivers to join…</p>
+    </div>
+
+    <div class="ptt-wrap">
+      <button class="mic" id="micBtn" type="button" disabled>
+        <span id="micIcon">🎤</span>
+      </button>
+      <p class="hint" id="pttHint">Connecting…</p>
+    </div>
+
+    <button class="leave-btn" id="leaveBtn" type="button">Leave channel</button>
+  </div>
+
+</div>
+<script src="/script.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
+        console.log("Service worker registration failed:", err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
