@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WTD Tracker — RoadTalk</title>
+<meta name="theme-color" content="#10161d">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RoadTalk">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="wtd-topbar-row">
+      <a href="/index.html" class="wtd-back">&larr; Back to RoadTalk</a>
+      <button class="wtd-reminder-btn" id="reminderBtn" type="button" aria-pressed="false">
+        <span class="wtd-reminder-dot" id="reminderDot"></span>
+        <span id="reminderBtnLabel">Reminders off</span>
+      </button>
+    </div>
+    <h1>WTD <span>TRACKER</span></h1>
+    <p class="subtitle">Shift &amp; break reminders that actually ping you</p>
+  </header>
+  <div class="wtd-toast hidden" id="reminderToast"></div>
+
+  <div class="wtd-week-card">
+    <div class="wtd-label">Reduced rests in your current cycle (9&ndash;10h rest, max 3)</div>
+    <div class="wtd-week-count"><span id="reducedCount">0</span><span class="wtd-week-count-max">/3</span></div>
+    <div class="wtd-week-hint" id="weekHint">&mdash;</div>
+    <button class="wtd-cycle-edit-btn" id="cycleEditBtn" type="button">Edit my work pattern</button>
+    <div class="wtd-cycle-settings hidden" id="cycleSettings">
+      <div class="wtd-cycle-row">
+        <label class="wtd-cycle-field">
+          <span>Work days</span>
+          <input type="number" id="cycleWorkDays" min="1" max="14" value="5">
+        </label>
+        <label class="wtd-cycle-field">
+          <span>Rest days</span>
+          <input type="number" id="cycleRestDays" min="1" max="14" value="3">
+        </label>
+      </div>
+      <label class="wtd-cycle-field wtd-cycle-date-field">
+        <span>First day of your current work block</span>
+        <input type="date" id="cycleStartDate">
+      </label>
+      <button class="wtd-cycle-save-btn" id="cycleSaveBtn" type="button">Save pattern</button>
+
+      <div class="wtd-backup-row">
+        <button class="wtd-backup-btn" id="exportBackupBtn" type="button">Export backup</button>
+        <button class="wtd-backup-btn" id="importBackupBtn" type="button">Import backup</button>
+        <input type="file" id="importBackupInput" accept="application/json" class="hidden">
+      </div>
+    </div>
+  </div>
+
+  <div class="wtd-resttype-row" id="restTypeRow">
+    <div class="wtd-label">Rest taken before this shift</div>
+    <div class="wtd-resttype-buttons">
+      <button class="wtd-resttype-btn on" id="restRegularBtn" data-type="regular">Regular (11h+)<br><span>13h max</span></button>
+      <button class="wtd-resttype-btn" id="restReducedBtn" data-type="reduced">Reduced (9&ndash;10h)<br><span>15h max</span></button>
+    </div>
+    <div class="wtd-resttype-warn hidden" id="restTypeWarn">You've already used all 3 reduced rests this week &mdash; this one will need compensating within 3 weeks.</div>
+  </div>
+
+  <div class="wtd-start-row" id="startRow">
+    <div>
+      <div class="wtd-label">Shift start time</div>
+      <div class="wtd-time-picker" id="timePicker">
+        <div class="wtd-time-picker-highlight"></div>
+        <div class="wtd-time-col" id="hourCol"></div>
+        <div class="wtd-time-sep">:</div>
+        <div class="wtd-time-col" id="minuteCol"></div>
+      </div>
+    </div>
+    <button class="wtd-primary-btn start" id="mainBtn">Start work</button>
+  </div>
+
+  <div class="wtd-shift-card hidden" id="shiftCard">
+    <div class="wtd-label">Shift spread (since <span id="shiftStartLabel">—</span>)</div>
+    <div class="wtd-shift-time" id="shiftTime">00:00:00</div>
+    <div class="wtd-shift-sub">
+      <span><span id="dailyLimitLabel">13</span>h limit in <b id="dailyRemaining">13:00</b></span>
+      <span>Breaks <b id="shiftBreaksTotal">0 min</b></span>
+    </div>
+    <div class="wtd-daily-msg ok" id="dailyMessage">Plenty of time left before your daily limit.</div>
+  </div>
+
+  <div class="wtd-card hidden" id="wtdCard">
+    <div class="wtd-ring-wrap">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle class="wtd-ring-bg" cx="44" cy="44" r="38"></circle>
+        <circle class="wtd-ring-fg" id="ringFg" cx="44" cy="44" r="38"
+          stroke-dasharray="238.76" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="wtd-ring-center">
+        <div class="wtd-ring-val" id="wtdRemaining">6:00</div>
+        <div class="wtd-ring-unit">left</div>
+      </div>
+    </div>
+    <div class="wtd-info">
+      <div class="wtd-label">Break needed within 6 hrs of work</div>
+      <div class="wtd-msg ok" id="wtdMessage">Working time under monitoring.</div>
+    </div>
+  </div>
+
+  <div class="wtd-break-row hidden" id="breakPresets">
+    <div class="wtd-label wtd-break-row-label">Take a break</div>
+    <div class="wtd-break-buttons">
+      <button class="wtd-preset-btn" id="preset30Btn" data-min="30">
+        <span class="wtd-preset-min">30</span><span class="wtd-preset-unit">min</span>
+      </button>
+      <button class="wtd-preset-btn" id="preset45Btn" data-min="45">
+        <span class="wtd-preset-min">45</span><span class="wtd-preset-unit">min</span>
+      </button>
+      <button class="wtd-preset-btn ghost" id="freeBreakBtn">
+        <span class="wtd-preset-min">&#8734;</span><span class="wtd-preset-unit">free</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="wtd-active-break hidden" id="activeBreakCard">
+    <div class="wtd-label">Break in progress</div>
+    <div class="wtd-break-timer" id="breakTimerEl">00:00</div>
+    <div class="wtd-break-target" id="breakTargetEl">Free break &mdash; end whenever you're ready</div>
+    <button class="wtd-primary-btn break-end" id="endBreakBtn">End break</button>
+  </div>
+
+  <div class="wtd-log-title hidden" id="logTitle">Today's break log</div>
+  <div id="logList">
+    <div class="wtd-empty-log hidden" id="emptyLog">No breaks logged yet.</div>
+  </div>
+
+  <button class="wtd-endshift-btn hidden" id="endShiftBtn">End shift &amp; reset</button>
+
+</div>
+<script src="/wtd.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
+        console.log("Service worker registration failed:", err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

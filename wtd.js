@@ -20,11 +20,27 @@
 
   var breaks = [];
   var breakStartMs = null;
+  var breakTargetSec = null; // null = free break, otherwise 30*60 or 45*60
+
+  var notified = {}; // one-shot flags so we don't spam the same alert twice per shift
 
   var startRow = document.getElementById("startRow");
   var mainBtn = document.getElementById("mainBtn");
-  var breakBtn = document.getElementById("breakBtn");
   var endShiftBtn = document.getElementById("endShiftBtn");
+
+  var reminderBtn = document.getElementById("reminderBtn");
+  var reminderDot = document.getElementById("reminderDot");
+  var reminderBtnLabel = document.getElementById("reminderBtnLabel");
+  var reminderToast = document.getElementById("reminderToast");
+
+  var breakPresets = document.getElementById("breakPresets");
+  var preset30Btn = document.getElementById("preset30Btn");
+  var preset45Btn = document.getElementById("preset45Btn");
+  var freeBreakBtn = document.getElementById("freeBreakBtn");
+  var activeBreakCard = document.getElementById("activeBreakCard");
+  var breakTimerEl = document.getElementById("breakTimerEl");
+  var breakTargetEl = document.getElementById("breakTargetEl");
+  var endBreakBtn = document.getElementById("endBreakBtn");
 
   var restTypeRow = document.getElementById("restTypeRow");
   var restRegularBtn = document.getElementById("restRegularBtn");
@@ -33,6 +49,12 @@
 
   var reducedCountEl = document.getElementById("reducedCount");
   var weekHintEl = document.getElementById("weekHint");
+  var cycleEditBtn = document.getElementById("cycleEditBtn");
+  var cycleSettings = document.getElementById("cycleSettings");
+  var cycleWorkDaysInput = document.getElementById("cycleWorkDays");
+  var cycleRestDaysInput = document.getElementById("cycleRestDays");
+  var cycleStartDateInput = document.getElementById("cycleStartDate");
+  var cycleSaveBtn = document.getElementById("cycleSaveBtn");
 
   var shiftCard = document.getElementById("shiftCard");
   var wtdCard = document.getElementById("wtdCard");
@@ -50,6 +72,80 @@
   var logTitle = document.getElementById("logTitle");
   var logList = document.getElementById("logList");
   var emptyLog = document.getElementById("emptyLog");
+
+  // ---------- Reminders (native notifications + in-page toast fallback) ----------
+
+  var RSTORAGE_KEY = "wtd_reminders_v1";
+  var remindersEnabled = false;
+  try { remindersEnabled = localStorage.getItem(RSTORAGE_KEY) === "1"; } catch (e) { /* ignore */ }
+
+  var toastTimer = null;
+
+  function showToast(msg) {
+    reminderToast.textContent = msg;
+    reminderToast.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      reminderToast.classList.add("hidden");
+    }, 6000);
+  }
+
+  function renderReminderBtn() {
+    reminderBtn.classList.toggle("on", remindersEnabled);
+    reminderBtn.setAttribute("aria-pressed", remindersEnabled ? "true" : "false");
+    reminderBtnLabel.textContent = remindersEnabled ? "Reminders on" : "Reminders off";
+  }
+
+  function notify(title, body) {
+    // Always show the in-page toast so it works even if native notifications
+    // are blocked or the tab doesn't have permission yet.
+    showToast(title + (body ? " — " + body : ""));
+
+    if (!remindersEnabled) return;
+    if (typeof Notification === "undefined") return;
+
+    if (Notification.permission === "granted") {
+      try {
+        var n = new Notification(title, { body: body, tag: "wtd-" + title });
+        setTimeout(function () { n.close(); }, 15000);
+      } catch (e) { /* some browsers restrict Notification() outside a SW; toast already shown */ }
+    }
+  }
+
+  reminderBtn.addEventListener("click", function () {
+    if (!remindersEnabled) {
+      if (typeof Notification === "undefined") {
+        remindersEnabled = true;
+        showToast("Native notifications aren't supported here — you'll still get on-screen reminders.");
+      } else if (Notification.permission === "granted") {
+        remindersEnabled = true;
+        showToast("Reminders on. We'll ping you for breaks and limits.");
+      } else if (Notification.permission === "denied") {
+        remindersEnabled = true;
+        showToast("Notifications are blocked in your browser settings — you'll still get on-screen reminders.");
+      } else {
+        Notification.requestPermission().then(function (perm) {
+          remindersEnabled = true;
+          if (perm === "granted") {
+            showToast("Reminders on. We'll ping you for breaks and limits.");
+          } else {
+            showToast("Reminders on (on-screen only) — allow notifications for alerts when the app is in the background.");
+          }
+          try { localStorage.setItem(RSTORAGE_KEY, "1"); } catch (e) { /* ignore */ }
+          renderReminderBtn();
+        });
+        return;
+      }
+    } else {
+      remindersEnabled = false;
+      showToast("Reminders off.");
+    }
+
+    try { localStorage.setItem(RSTORAGE_KEY, remindersEnabled ? "1" : "0"); } catch (e) { /* ignore */ }
+    renderReminderBtn();
+  });
+
+  renderReminderBtn();
 
   function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -76,29 +172,73 @@
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   }
 
-  // ---------- Week tracking (Mon 00:00 - Sun 24:00), persisted in localStorage ----------
+  // ---------- Rota-cycle tracking (custom work/rest pattern, not Mon-Sun), persisted in localStorage ----------
 
-  function mondayOf(date) {
-    var d = new Date(date);
-    var day = d.getDay(); // 0 = Sunday
-    var diff = (day === 0 ? -6 : 1) - day;
-    d.setDate(d.getDate() + diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
+  var CYCLE_KEY = "wtd_cycle_pattern_v1";
+
+  function parseDateOnly(str) {
+    var parts = str.split("-");
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  }
+
+  function loadCyclePattern() {
+    try {
+      var raw = localStorage.getItem(CYCLE_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && p.anchor && p.workDays && p.restDays) return p;
+      }
+    } catch (e) { /* ignore, fall through to default */ }
+    // Default for this driver: 5 days on / 3 days off, current work
+    // block started Thursday 2026-08-06 (3 days worked as of 2026-08-08).
+    return { anchor: "2026-08-06", workDays: 5, restDays: 3 };
+  }
+
+  function saveCyclePattern(p) {
+    try { localStorage.setItem(CYCLE_KEY, JSON.stringify(p)); } catch (e) { /* ignore */ }
+  }
+
+  var cyclePattern = loadCyclePattern();
+
+  function cycleLenDays() {
+    return cyclePattern.workDays + cyclePattern.restDays;
+  }
+
+  function currentCycleStart() {
+    var anchor = parseDateOnly(cyclePattern.anchor);
+    anchor.setHours(0, 0, 0, 0);
+    var len = cycleLenDays();
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var daysSince = Math.round((today - anchor) / 86400000);
+    var idx = Math.floor(daysSince / len);
+    var start = new Date(anchor);
+    start.setDate(start.getDate() + idx * len);
+    return start;
+  }
+
+  function cycleDayInfo() {
+    var start = currentCycleStart();
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var dayNum = Math.round((today - start) / 86400000) + 1; // 1-indexed within the cycle
+    var len = cycleLenDays();
+    var phase = dayNum <= cyclePattern.workDays ? "work" : "rest";
+    return { dayNum: dayNum, cycleLen: len, phase: phase, start: start };
   }
 
   function loadWeekData() {
-    var thisMonday = fmtDate(mondayOf(new Date()));
+    var thisCycleStart = fmtDate(currentCycleStart());
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var data = JSON.parse(raw);
-        if (data.weekStart === thisMonday) {
+        if (data.cycleStart === thisCycleStart) {
           return data;
         }
       }
-    } catch (e) { /* ignore, fall through to fresh week */ }
-    return { weekStart: thisMonday, reducedCount: 0 };
+    } catch (e) { /* ignore, fall through to fresh cycle */ }
+    return { cycleStart: thisCycleStart, reducedCount: 0 };
   }
 
   function saveWeekData(data) {
@@ -110,15 +250,107 @@
   var weekData = loadWeekData();
 
   function renderWeekCard() {
-    weekData = loadWeekData(); // re-check in case the week rolled over
+    weekData = loadWeekData(); // re-check in case the cycle rolled over
     reducedCountEl.textContent = weekData.reducedCount;
     reducedCountEl.parentElement.classList.toggle(
       "maxed", weekData.reducedCount >= MAX_REDUCED_RESTS_PER_WEEK
     );
-    var nextMonday = new Date(mondayOf(new Date()));
-    nextMonday.setDate(nextMonday.getDate() + 7);
-    weekHintEl.textContent = "Week of " + weekData.weekStart + " · resets Monday";
+
+    var info = cycleDayInfo();
+    var nextStart = new Date(info.start);
+    nextStart.setDate(nextStart.getDate() + info.cycleLen);
+
+    var phaseLabel = info.phase === "work"
+      ? "Work day " + info.dayNum + "/" + cyclePattern.workDays
+      : "Rest day " + (info.dayNum - cyclePattern.workDays) + "/" + cyclePattern.restDays;
+
+    weekHintEl.textContent = phaseLabel + " · new cycle starts " + fmtDate(nextStart);
   }
+
+  cycleWorkDaysInput.value = cyclePattern.workDays;
+  cycleRestDaysInput.value = cyclePattern.restDays;
+  cycleStartDateInput.value = cyclePattern.anchor;
+
+  cycleEditBtn.addEventListener("click", function () {
+    cycleSettings.classList.toggle("hidden");
+  });
+
+  cycleSaveBtn.addEventListener("click", function () {
+    var wd = parseInt(cycleWorkDaysInput.value, 10);
+    var rd = parseInt(cycleRestDaysInput.value, 10);
+    var anchor = cycleStartDateInput.value;
+
+    if (!anchor || !(wd > 0) || !(rd > 0)) {
+      showToast("Fill in work days, rest days and a start date first.");
+      return;
+    }
+
+    cyclePattern = { anchor: anchor, workDays: wd, restDays: rd };
+    saveCyclePattern(cyclePattern);
+    cycleSettings.classList.add("hidden");
+    renderWeekCard();
+    showToast("Work pattern saved — " + wd + " on, " + rd + " off.");
+  });
+
+  // ---------- Backup export / import (protects against lost browser storage) ----------
+
+  var exportBackupBtn = document.getElementById("exportBackupBtn");
+  var importBackupBtn = document.getElementById("importBackupBtn");
+  var importBackupInput = document.getElementById("importBackupInput");
+
+  var BACKUP_KEYS = [STORAGE_KEY, CYCLE_KEY, "wtd_reminders_v1", "roadtalk_server"];
+
+  exportBackupBtn.addEventListener("click", function () {
+    var data = {};
+    BACKUP_KEYS.forEach(function (key) {
+      try {
+        var val = localStorage.getItem(key);
+        if (val !== null) data[key] = val;
+      } catch (e) { /* ignore */ }
+    });
+
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "roadtalk-backup-" + fmtDate(new Date()) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Backup saved to your downloads.");
+  });
+
+  importBackupBtn.addEventListener("click", function () {
+    importBackupInput.click();
+  });
+
+  importBackupInput.addEventListener("change", function () {
+    var file = importBackupInput.files && importBackupInput.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        BACKUP_KEYS.forEach(function (key) {
+          if (Object.prototype.hasOwnProperty.call(data, key)) {
+            localStorage.setItem(key, data[key]);
+          }
+        });
+        cyclePattern = loadCyclePattern();
+        cycleWorkDaysInput.value = cyclePattern.workDays;
+        cycleRestDaysInput.value = cyclePattern.restDays;
+        cycleStartDateInput.value = cyclePattern.anchor;
+        renderWeekCard();
+        showToast("Backup restored.");
+      } catch (e) {
+        showToast("That file doesn't look like a valid RoadTalk backup.");
+      }
+      importBackupInput.value = "";
+    };
+    reader.readAsText(file);
+  });
 
   var hourCol = document.getElementById("hourCol");
   var minuteCol = document.getElementById("minuteCol");
@@ -241,10 +473,18 @@
       dailyMessageEl.className = "wtd-daily-msg urgent";
       dailyMessageEl.textContent = "Urgent: " + Math.ceil(dailyRemaining / 60) +
         " min left until your " + (dailyLimitSec / 3600) + "-hour daily limit. Start looking for parking now.";
+      if (!notified.daily30 && dailyRemaining > 0) {
+        notified.daily30 = true;
+        notify("30 min to your daily limit", "Start looking for parking now.");
+      }
     } else if (dailyRemaining <= 60 * 60) {
       dailyMessageEl.className = "wtd-daily-msg warn";
       dailyMessageEl.textContent = Math.ceil(dailyRemaining / 60) +
         " min left until your " + (dailyLimitSec / 3600) + "-hour daily limit. Start planning where to stop.";
+      if (!notified.daily60 && dailyRemaining > 0) {
+        notified.daily60 = true;
+        notify("1 hour to your daily limit", "Start planning where to stop.");
+      }
     } else {
       dailyMessageEl.className = "wtd-daily-msg ok";
       dailyMessageEl.textContent = "Plenty of time left before your " + (dailyLimitSec / 3600) + "-hour daily limit.";
@@ -265,14 +505,26 @@
       ringFg.style.stroke = "var(--alert-red)";
       wtdMessageEl.className = "wtd-msg urgent";
       wtdMessageEl.textContent = "Urgent: " + Math.ceil(remaining / 60) + " minutes left until the 6-hour limit.";
+      if (!notified.wtd5) {
+        notified.wtd5 = true;
+        notify("5 min until your 6-hour limit", "Take a break now.");
+      }
     } else if (remaining <= 15 * 60) {
       ringFg.style.stroke = "var(--amber)";
       wtdMessageEl.className = "wtd-msg warn";
       wtdMessageEl.textContent = "15 minutes left. Take your break now.";
+      if (!notified.wtd15) {
+        notified.wtd15 = true;
+        notify("15 min left before a break is due", "Start looking for a place to stop.");
+      }
     } else if (remaining <= 30 * 60) {
       ringFg.style.stroke = "var(--amber)";
       wtdMessageEl.className = "wtd-msg warn";
       wtdMessageEl.textContent = "30 minutes left until you must take a break.";
+      if (!notified.wtd30) {
+        notified.wtd30 = true;
+        notify("30 min left before a break is due", "");
+      }
     } else if (remaining <= 45 * 60) {
       ringFg.style.stroke = "var(--amber)";
       wtdMessageEl.className = "wtd-msg warn";
@@ -283,12 +535,43 @@
       wtdMessageEl.textContent = "Working time under monitoring. No break needed yet.";
     }
 
+    renderBreakUI();
+  }
+
+  function renderBreakUI() {
     if (state === "break") {
-      breakBtn.textContent = "End break";
-      breakBtn.className = "wtd-primary-btn break-end";
+      breakPresets.classList.add("hidden");
+      activeBreakCard.classList.remove("hidden");
+
+      var elapsed = (Date.now() - breakStartMs) / 1000;
+
+      if (breakTargetSec) {
+        var left = breakTargetSec - elapsed;
+        if (left <= 0) {
+          breakTimerEl.textContent = "00:00";
+          breakTargetEl.textContent = "Break's done — back to work when you are.";
+          breakTargetEl.className = "wtd-break-target done";
+          if (!notified.breakDone) {
+            notified.breakDone = true;
+            notify("Break finished", "Time to get back on the road.");
+          }
+        } else {
+          breakTimerEl.textContent = fmtMS(left);
+          breakTargetEl.textContent = (breakTargetSec / 60) + " min break — counting down";
+          breakTargetEl.className = "wtd-break-target";
+        }
+      } else {
+        breakTimerEl.textContent = fmtMS(elapsed);
+        breakTargetEl.textContent = "Free break — end whenever you're ready";
+        breakTargetEl.className = "wtd-break-target";
+      }
     } else {
-      breakBtn.textContent = "Start break";
-      breakBtn.className = "wtd-primary-btn break-start";
+      activeBreakCard.classList.add("hidden");
+      if (state === "working") {
+        breakPresets.classList.remove("hidden");
+      } else {
+        breakPresets.classList.add("hidden");
+      }
     }
   }
 
@@ -313,7 +596,7 @@
     startRow.classList.add("hidden");
     shiftCard.classList.remove("hidden");
     wtdCard.classList.remove("hidden");
-    breakBtn.classList.remove("hidden");
+    breakPresets.classList.remove("hidden");
     logTitle.classList.remove("hidden");
     endShiftBtn.classList.remove("hidden");
   }
@@ -325,13 +608,16 @@
     lastResumeMs = null;
     breaks = [];
     breakStartMs = null;
+    breakTargetSec = null;
     countedThisShift = false;
+    notified = {};
 
     restTypeRow.classList.remove("hidden");
     startRow.classList.remove("hidden");
     shiftCard.classList.add("hidden");
     wtdCard.classList.add("hidden");
-    breakBtn.classList.add("hidden");
+    breakPresets.classList.add("hidden");
+    activeBreakCard.classList.add("hidden");
     logTitle.classList.add("hidden");
     endShiftBtn.classList.add("hidden");
 
@@ -367,33 +653,51 @@
     render();
   });
 
-  breakBtn.addEventListener("click", function () {
-    if (state === "working") {
-      if (lastResumeMs) {
-        workAccumSec += (Date.now() - lastResumeMs) / 1000;
-        lastResumeMs = null;
-      }
-      state = "break";
-      breakStartMs = Date.now();
-    } else if (state === "break") {
-      var durationSec = (Date.now() - breakStartMs) / 1000;
-      breaks.push({
-        startDate: new Date(breakStartMs),
-        endDate: new Date(),
-        durationSec: durationSec
-      });
+  function startBreak(targetMin) {
+    if (state !== "working") return;
 
-      if (durationSec >= MIN_BREAK_TO_RESET_SEC) {
-        workAccumSec = 0;
-      }
-
-      breakStartMs = null;
-      state = "working";
-      lastResumeMs = Date.now();
-      renderLog();
+    if (lastResumeMs) {
+      workAccumSec += (Date.now() - lastResumeMs) / 1000;
+      lastResumeMs = null;
     }
+    state = "break";
+    breakStartMs = Date.now();
+    breakTargetSec = targetMin ? targetMin * 60 : null;
+    notified.breakDone = false;
+
+    if (targetMin) {
+      notify(targetMin + " min break started", "We'll ping you when it's up.");
+    }
+
     render();
-  });
+  }
+
+  function endBreak() {
+    if (state !== "break") return;
+
+    var durationSec = (Date.now() - breakStartMs) / 1000;
+    breaks.push({
+      startDate: new Date(breakStartMs),
+      endDate: new Date(),
+      durationSec: durationSec
+    });
+
+    if (durationSec >= MIN_BREAK_TO_RESET_SEC) {
+      workAccumSec = 0;
+    }
+
+    breakStartMs = null;
+    breakTargetSec = null;
+    state = "working";
+    lastResumeMs = Date.now();
+    renderLog();
+    render();
+  }
+
+  preset30Btn.addEventListener("click", function () { startBreak(30); });
+  preset45Btn.addEventListener("click", function () { startBreak(45); });
+  freeBreakBtn.addEventListener("click", function () { startBreak(null); });
+  endBreakBtn.addEventListener("click", endBreak);
 
   endShiftBtn.addEventListener("click", function () {
     if (confirm("End shift and clear today's data? Your weekly reduced-rest count is kept.")) {

@@ -355,6 +355,157 @@ h1 span {
     margin-bottom: 10px;
 }
 
+.wtd-topbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.wtd-reminder-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel);
+    border: 1px solid var(--panel-light);
+    border-radius: 999px;
+    padding: 7px 12px 7px 10px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 10px;
+    touch-action: manipulation;
+}
+
+.wtd-reminder-btn.on {
+    color: var(--signal-green);
+    border-color: var(--signal-green);
+}
+
+.wtd-reminder-btn:active { transform: scale(0.97); }
+
+.wtd-reminder-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.wtd-reminder-btn.on .wtd-reminder-dot {
+    background: var(--signal-green);
+    box-shadow: 0 0 6px 1px var(--signal-green);
+}
+
+.wtd-toast {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    max-width: 448px;
+    margin: 0 auto;
+    background: var(--panel-light);
+    border: 1px solid var(--amber-dim);
+    border-left: 4px solid var(--amber);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    z-index: 50;
+    animation: wtd-toast-in 0.25s ease;
+}
+
+@keyframes wtd-toast-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Break presets ---------- */
+.wtd-break-row {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 16px 18px 18px;
+    margin-bottom: 16px;
+}
+
+.wtd-break-row-label { margin-bottom: 10px; }
+
+.wtd-break-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.wtd-preset-btn {
+    background: #0d1319;
+    border: 2px solid var(--panel-light);
+    border-radius: 14px;
+    padding: 14px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    touch-action: manipulation;
+    color: var(--text);
+}
+
+.wtd-preset-btn:active { transform: scale(0.97); }
+
+.wtd-preset-min {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.wtd-preset-unit {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.wtd-preset-btn.ghost {
+    border-style: dashed;
+    color: var(--text-muted);
+}
+
+/* ---------- Active break card ---------- */
+.wtd-active-break {
+    background: var(--panel);
+    border: 2px solid var(--amber-dim);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.wtd-break-timer {
+    font-size: 44px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--amber);
+    margin: 4px 0 6px;
+    letter-spacing: 1px;
+}
+
+.wtd-break-target {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.wtd-break-target.done {
+    color: var(--signal-green);
+    font-weight: 700;
+}
+
 .wtd-label {
     font-size: 11px;
     color: var(--text-muted);
@@ -648,6 +799,93 @@ h1 span {
     margin-top: 6px;
     font-size: 11px;
     color: var(--text-muted);
+}
+
+.wtd-cycle-edit-btn {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: var(--amber);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    padding: 4px;
+    touch-action: manipulation;
+}
+
+.wtd-cycle-settings {
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--panel-light);
+    text-align: left;
+}
+
+.wtd-cycle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.wtd-cycle-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+.wtd-cycle-field input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-light);
+    background: #0d1319;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.wtd-cycle-date-field { margin-bottom: 12px; }
+
+.wtd-cycle-save-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--amber);
+    color: #2e2308;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.wtd-backup-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.wtd-backup-btn {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-light);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
 .wtd-resttype-row {

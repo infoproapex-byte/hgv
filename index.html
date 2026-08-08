@@ -3,84 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>WTD Tracker — RoadTalk</title>
+<title>RoadTalk</title>
+<meta name="theme-color" content="#10161d">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RoadTalk">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="app">
 
   <header class="topbar">
-    <a href="/index.html" class="wtd-back">&larr; Back to RoadTalk</a>
-    <h1>WTD <span>TRACKER</span></h1>
-    <p class="subtitle">Manual shift &amp; break reminders</p>
+    <h1>ROAD<span>TALK</span></h1>
+    <p class="subtitle">Live voice channel for drivers</p>
   </header>
 
-  <div class="wtd-week-card">
-    <div class="wtd-label">Reduced rests this week (9&ndash;10h rest, max 3)</div>
-    <div class="wtd-week-count"><span id="reducedCount">0</span><span class="wtd-week-count-max">/3</span></div>
-    <div class="wtd-week-hint" id="weekHint">Week resets Monday 00:00</div>
+  <button class="routes-btn" id="routesBtn" type="button">
+    <svg class="routes-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3" opacity="0.5"/>
+      <path d="M24 12v12l8 5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>WTD Tracker</span>
+  </button>
+
+  <div class="server-box">
+    <label for="serverUrl">Server address</label>
+    <input type="text" id="serverUrl" placeholder="wss://your-server.onrender.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p class="server-hint">Enter the signaling server address once — it's saved on this device.</p>
   </div>
 
-  <div class="wtd-resttype-row" id="restTypeRow">
-    <div class="wtd-label">Rest taken before this shift</div>
-    <div class="wtd-resttype-buttons">
-      <button class="wtd-resttype-btn on" id="restRegularBtn" data-type="regular">Regular (11h+)<br><span>13h max</span></button>
-      <button class="wtd-resttype-btn" id="restReducedBtn" data-type="reduced">Reduced (9&ndash;10h)<br><span>15h max</span></button>
+  <button class="join-btn" id="joinBtn" type="button">Join channel</button>
+  <p class="pick-hint" id="pickHint">Enter your server address, then tap Join channel.</p>
+
+  <div class="room hidden" id="room">
+    <div class="room-head">
+      <span class="channel-dot" id="channelDot"></span>
+      <h2 id="roomTitle">RoadTalk</h2>
+      <span class="status" id="statusText">Ready</span>
     </div>
-    <div class="wtd-resttype-warn hidden" id="restTypeWarn">You've already used all 3 reduced rests this week &mdash; this one will need compensating within 3 weeks.</div>
-  </div>
 
-  <div class="wtd-start-row" id="startRow">
-    <div>
-      <div class="wtd-label">Shift start time</div>
-      <div class="wtd-time-picker" id="timePicker">
-        <div class="wtd-time-picker-highlight"></div>
-        <div class="wtd-time-col" id="hourCol"></div>
-        <div class="wtd-time-sep">:</div>
-        <div class="wtd-time-col" id="minuteCol"></div>
-      </div>
+    <div class="participants" id="participants">
+      <p class="empty-hint" id="emptyHint">Waiting for other drivers to join…</p>
     </div>
-    <button class="wtd-primary-btn start" id="mainBtn">Start work</button>
-  </div>
 
-  <div class="wtd-shift-card hidden" id="shiftCard">
-    <div class="wtd-label">Shift spread (since <span id="shiftStartLabel">—</span>)</div>
-    <div class="wtd-shift-time" id="shiftTime">00:00:00</div>
-    <div class="wtd-shift-sub">
-      <span><span id="dailyLimitLabel">13</span>h limit in <b id="dailyRemaining">13:00</b></span>
-      <span>Breaks <b id="shiftBreaksTotal">0 min</b></span>
+    <div class="ptt-wrap">
+      <button class="mic" id="micBtn" type="button" disabled>
+        <span id="micIcon">🎤</span>
+      </button>
+      <p class="hint" id="pttHint">Connecting…</p>
     </div>
-    <div class="wtd-daily-msg ok" id="dailyMessage">Plenty of time left before your daily limit.</div>
+
+    <button class="leave-btn" id="leaveBtn" type="button">Leave channel</button>
   </div>
-
-  <div class="wtd-card hidden" id="wtdCard">
-    <div class="wtd-ring-wrap">
-      <svg width="88" height="88" viewBox="0 0 88 88">
-        <circle class="wtd-ring-bg" cx="44" cy="44" r="38"></circle>
-        <circle class="wtd-ring-fg" id="ringFg" cx="44" cy="44" r="38"
-          stroke-dasharray="238.76" stroke-dashoffset="0"></circle>
-      </svg>
-      <div class="wtd-ring-center">
-        <div class="wtd-ring-val" id="wtdRemaining">6:00</div>
-        <div class="wtd-ring-unit">left</div>
-      </div>
-    </div>
-    <div class="wtd-info">
-      <div class="wtd-label">Break needed within 6 hrs of work</div>
-      <div class="wtd-msg ok" id="wtdMessage">Working time under monitoring.</div>
-    </div>
-  </div>
-
-  <button class="wtd-primary-btn break-start hidden" id="breakBtn">Start break</button>
-
-  <div class="wtd-log-title hidden" id="logTitle">Today's break log</div>
-  <div id="logList">
-    <div class="wtd-empty-log hidden" id="emptyLog">No breaks logged yet.</div>
-  </div>
-
-  <button class="wtd-endshift-btn hidden" id="endShiftBtn">End shift &amp; reset</button>
 
 </div>
-<script src="/wtd.js"></script>
+<script src="/script.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
+        console.log("Service worker registration failed:", err);
+      });
+    });
+  }
+</script>
 </body>
 </html>
