@@ -39,6 +39,7 @@
   var reminderDot = document.getElementById("reminderDot");
   var reminderBtnLabel = document.getElementById("reminderBtnLabel");
   var reminderToast = document.getElementById("reminderToast");
+  var wakeLockBadge = document.getElementById("wakeLockBadge");
 
   var breakPresets = document.getElementById("breakPresets");
   var preset30Btn = document.getElementById("preset30Btn");
@@ -155,6 +156,49 @@
   });
 
   renderReminderBtn();
+
+  // ---------- Keep screen on during an active shift (Screen Wake Lock API) ----------
+  // Requires HTTPS. Fails silently on unsupported browsers or if the OS
+  // denies it — the 6-hour clock keeps counting correctly either way,
+  // this just stops the phone from dimming/locking on its own.
+
+  var wakeLock = null;
+
+  function updateWakeLockBadge() {
+    if (wakeLockBadge) wakeLockBadge.classList.toggle("hidden", !wakeLock);
+  }
+
+  function requestWakeLock() {
+    if (!("wakeLock" in navigator)) return;
+
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeLock = lock;
+      updateWakeLockBadge();
+      lock.addEventListener("release", function () {
+        wakeLock = null;
+        updateWakeLockBadge();
+      });
+    }).catch(function () {
+      // Permission denied, battery saver on, or unsupported browser — ignore.
+    });
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release().catch(function () { /* ignore */ });
+      wakeLock = null;
+      updateWakeLockBadge();
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    // The OS force-releases the wake lock whenever the tab is hidden
+    // (screen off, app switched away). Grab it again the moment the
+    // driver comes back, as long as a shift is still running.
+    if (document.visibilityState === "visible" && state !== "idle") {
+      requestWakeLock();
+    }
+  });
 
   function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -622,6 +666,7 @@
     breakTargetSec = null;
     countedThisShift = false;
     notified = {};
+    releaseWakeLock();
 
     restTypeRow.classList.remove("hidden");
     startRow.classList.remove("hidden");
@@ -658,6 +703,7 @@
     state = "working";
     lastResumeMs = Date.now();
     workAccumSec = 0;
+    requestWakeLock();
 
     showActiveUI();
     renderLog();

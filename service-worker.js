@@ -1,7 +1,7 @@
 "use strict";
 
 // Bump this whenever any cached file changes, so Android picks up the update.
-var CACHE_NAME = "roadtalk-v2";
+var CACHE_NAME = "roadtalk-v3";
 
 var APP_SHELL = [
   "/index.html",

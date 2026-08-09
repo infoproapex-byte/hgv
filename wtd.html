@@ -19,10 +19,13 @@
   <header class="topbar">
     <div class="wtd-topbar-row">
       <a href="/index.html" class="wtd-back">&larr; Back to RoadTalk</a>
-      <button class="wtd-reminder-btn" id="reminderBtn" type="button" aria-pressed="false">
-        <span class="wtd-reminder-dot" id="reminderDot"></span>
-        <span id="reminderBtnLabel">Reminders off</span>
-      </button>
+      <div class="wtd-topbar-badges">
+        <span class="wtd-wakelock-badge hidden" id="wakeLockBadge">&#9728;&#65039; Screen on</span>
+        <button class="wtd-reminder-btn" id="reminderBtn" type="button" aria-pressed="false">
+          <span class="wtd-reminder-dot" id="reminderDot"></span>
+          <span id="reminderBtnLabel">Reminders off</span>
+        </button>
+      </div>
     </div>
     <h1>WTD <span>TRACKER</span></h1>
     <p class="subtitle">Shift &amp; break reminders that actually ping you</p>

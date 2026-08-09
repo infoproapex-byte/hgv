@@ -360,6 +360,25 @@ h1 span {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    flex-wrap: wrap;
+}
+
+.wtd-topbar-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.wtd-wakelock-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--signal-green);
+    background: var(--panel);
+    border: 1px solid var(--panel-light);
+    border-radius: 999px;
+    padding: 7px 10px;
+    white-space: nowrap;
 }
 
 .wtd-reminder-btn {
