@@ -107,20 +107,29 @@
   }
 
   function notify(title, body) {
-    // Always show the in-page toast so it works even if native notifications
-    // are blocked or the tab doesn't have permission yet.
-    showToast(title + (body ? " — " + body : ""));
+  // Always show the in-page toast
+  // This works even when native notifications are unavailable.
+  showToast(title + (body ? " — " + body : ""));
 
-    if (!remindersEnabled) return;
-    if (typeof Notification === "undefined") return;
+  if (!remindersEnabled) return;
 
-    if (Notification.permission === "granted") {
-      try {
-        var n = new Notification(title, { body: body, tag: "wtd-" + title });
-        setTimeout(function () { n.close(); }, 15000);
-      } catch (e) { /* some browsers restrict Notification() outside a SW; toast already shown */ }
-    }
-  }
+  // Use the Service Worker for iPhone/PWA notifications.
+  if (!("serviceWorker" in navigator)) return;
+
+  navigator.serviceWorker.ready.then(function (registration) {
+    if (!registration.showNotification) return;
+
+    registration.showNotification(title, {
+      body: body || "",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      tag: "wtd-" + title,
+      renotify: true
+    });
+  }).catch(function () {
+    // On-screen toast still works if native notification fails.
+  });
+}
 
   on(reminderBtn, "click", function () {
     if (!remindersEnabled) {
