@@ -2,155 +2,1989 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>WTD Tracker — RoadTalk</title>
-<meta name="theme-color" content="#10161d">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="RoadTalk">
-<link rel="stylesheet" href="/style.css">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta name="theme-color" content="#111827">
+
+<title>WTD Tracker</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #f3f4f6;
+        color: #111827;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+        max-width: 520px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding: 18px;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    header p {
+        margin: 5px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .status {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #6b7280;
+    }
+
+    .timer {
+        text-align: center;
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin: 5px 0 15px;
+    }
+
+    .timer-label {
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+    button {
+        width: 100%;
+        border: 0;
+        border-radius: 14px;
+        padding: 17px 10px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .start {
+        background: #16a34a;
+        color: white;
+    }
+
+    .end {
+        background: #dc2626;
+        color: white;
+    }
+
+    .break-button {
+        background: #2563eb;
+        color: white;
+    }
+
+    .small-button {
+        background: #e5e7eb;
+        color: #111827;
+        font-size: 15px;
+        padding: 13px;
+    }
+
+    button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .break-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .break-options button {
+        margin: 0;
+        padding: 14px 5px;
+        font-size: 16px;
+    }
+
+    .break-15 {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .break-30 {
+        background: #bfdbfe;
+        color: #1e3a8a;
+    }
+
+    .break-45 {
+        background: #93c5fd;
+        color: #172554;
+    }
+
+    .info {
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #6b7280;
+    }
+
+    .warning {
+        background: #fef3c7;
+        color: #92400e;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        font-weight: 700;
+        margin-top: 12px;
+        display: none;
+    }
+
+    .danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        font-weight: 700;
+        margin-top: 12px;
+        display: none;
+    }
+
+    .success {
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        font-weight: 700;
+        margin-top: 12px;
+        display: none;
+    }
+
+    .section-title {
+        font-size: 19px;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .weekly-total {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 8px 0;
+    }
+
+    .weekly-sub {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .day {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .day:last-child {
+        border-bottom: 0;
+    }
+
+    .day-left {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .day-date {
+        font-weight: 700;
+    }
+
+    .day-time {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .day-hours {
+        font-weight: 800;
+        text-align: right;
+    }
+
+    .break-running {
+        background: #eff6ff;
+        border: 2px solid #2563eb;
+        border-radius: 14px;
+        padding: 14px;
+        text-align: center;
+        display: none;
+    }
+
+    .break-running-title {
+        font-weight: 800;
+        color: #1d4ed8;
+        margin-bottom: 5px;
+    }
+
+    .break-countdown {
+        font-size: 34px;
+        font-weight: 800;
+        color: #1e40af;
+    }
+
+    .muted {
+        color: #9ca3af;
+    }
+
+    .settings-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notification-status {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+
+    footer {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 11px;
+        padding: 10px 0 25px;
+        line-height: 1.5;
+    }
+</style>
 </head>
+
 <body>
+
 <div class="app">
 
-  <header class="topbar">
-    <div class="wtd-topbar-row">
-      <a href="/index.html" class="wtd-back">&larr; Back to RoadTalk</a>
-      <div class="wtd-topbar-badges">
-        <span class="wtd-wakelock-badge hidden" id="wakeLockBadge">&#9728;&#65039; Screen on</span>
-        <button class="wtd-reminder-btn" id="reminderBtn" type="button" aria-pressed="false">
-          <span class="wtd-reminder-dot" id="reminderDot"></span>
-          <span id="reminderBtnLabel">Reminders off</span>
+    <header>
+        <h1>WTD TRACKER</h1>
+        <p>UK HGV Working Time</p>
+    </header>
+
+    <!-- CURRENT SHIFT -->
+    <div class="card">
+
+        <div id="status" class="status">SHIFT NOT STARTED</div>
+
+        <div class="timer-label">WORKING TIME</div>
+        <div id="workingTimer" class="timer">00:00:00</div>
+
+        <div class="timer-label">CONSECUTIVE WORKING TIME</div>
+        <div id="continuousTimer" class="timer" style="font-size:32px;">
+            00:00:00
+        </div>
+
+        <button id="startButton" class="start">
+            START WORK
         </button>
-      </div>
+
+        <button id="endButton" class="end" style="display:none;">
+            END WORK
+        </button>
+
+        <div id="warningBox" class="warning">
+            ⚠️ WTD BREAK REMINDER<br>
+            You have 30 minutes until 6 hours.
+        </div>
+
+        <div id="dangerBox" class="danger">
+            🚨 WTD BREAK DUE<br>
+            You have reached 6 hours of consecutive working time.
+        </div>
+
+        <div id="successBox" class="success">
+            ✅ Break recorded.
+        </div>
+
     </div>
-    <h1>WTD <span>TRACKER</span></h1>
-    <p class="subtitle">Shift &amp; break reminders that actually ping you</p>
-  </header>
-  <div class="wtd-toast hidden" id="reminderToast"></div>
 
-  <div class="wtd-week-card">
-    <div class="wtd-label">Reduced rests in your current cycle (9&ndash;10h rest, max 3)</div>
-    <div class="wtd-week-count"><span id="reducedCount">0</span><span class="wtd-week-count-max">/3</span></div>
-    <div class="wtd-week-hint" id="weekHint">&mdash;</div>
-    <button class="wtd-cycle-edit-btn" id="cycleEditBtn" type="button">Edit my work pattern</button>
-    <div class="wtd-cycle-settings hidden" id="cycleSettings">
-      <div class="wtd-cycle-row">
-        <label class="wtd-cycle-field">
-          <span>Work days</span>
-          <input type="number" id="cycleWorkDays" min="1" max="14" value="5">
-        </label>
-        <label class="wtd-cycle-field">
-          <span>Rest days</span>
-          <input type="number" id="cycleRestDays" min="1" max="14" value="3">
-        </label>
-      </div>
-      <label class="wtd-cycle-field wtd-cycle-date-field">
-        <span>First day of your current work block</span>
-        <input type="date" id="cycleStartDate">
-      </label>
-      <button class="wtd-cycle-save-btn" id="cycleSaveBtn" type="button">Save pattern</button>
 
-      <div class="wtd-backup-row">
-        <button class="wtd-backup-btn" id="exportBackupBtn" type="button">Export backup</button>
-        <button class="wtd-backup-btn" id="importBackupBtn" type="button">Import backup</button>
-        <input type="file" id="importBackupInput" accept="application/json" class="hidden">
-      </div>
+    <!-- BREAK -->
+    <div class="card">
+
+        <div class="section-title">
+            WTD BREAK
+        </div>
+
+        <div class="info">
+            Select the break you are taking.
+        </div>
+
+        <div class="break-options">
+
+            <button class="break-15" data-minutes="15">
+                15 MIN
+            </button>
+
+            <button class="break-30" data-minutes="30">
+                30 MIN
+            </button>
+
+            <button class="break-45" data-minutes="45">
+                45 MIN
+            </button>
+
+        </div>
+
+        <div id="breakRunning" class="break-running">
+
+            <div class="break-running-title">
+                BREAK IN PROGRESS
+            </div>
+
+            <div id="breakCountdown" class="break-countdown">
+                00:45:00
+            </div>
+
+            <div class="info">
+                Working time is paused.
+            </div>
+
+        </div>
+
     </div>
-  </div>
 
-  <div class="wtd-resttype-row" id="restTypeRow">
-    <div class="wtd-label">Rest taken before this shift</div>
-    <div class="wtd-resttype-buttons">
-      <button class="wtd-resttype-btn on" id="restRegularBtn" data-type="regular">Regular (11h+)<br><span>13h max</span></button>
-      <button class="wtd-resttype-btn" id="restReducedBtn" data-type="reduced">Reduced (9&ndash;10h)<br><span>15h max</span></button>
+
+    <!-- TODAY -->
+    <div class="card">
+
+        <div class="section-title">
+            TODAY
+        </div>
+
+        <div class="info">
+            Start: <strong id="todayStart">--:--</strong>
+            <br>
+            End: <strong id="todayEnd">--:--</strong>
+            <br>
+            Breaks: <strong id="todayBreak">0 min</strong>
+        </div>
+
     </div>
-    <div class="wtd-resttype-warn hidden" id="restTypeWarn">You've already used all 3 reduced rests this week &mdash; this one will need compensating within 3 weeks.</div>
-  </div>
 
-  <div class="wtd-start-row" id="startRow">
-    <div>
-      <div class="wtd-label">Shift start time</div>
-      <div class="wtd-time-picker" id="timePicker">
-        <div class="wtd-time-picker-highlight"></div>
-        <div class="wtd-time-col" id="hourCol"></div>
-        <div class="wtd-time-sep">:</div>
-        <div class="wtd-time-col" id="minuteCol"></div>
-      </div>
+
+    <!-- WEEK -->
+    <div class="card">
+
+        <div class="section-title">
+            THIS WEEK
+        </div>
+
+        <div class="weekly-total" id="weeklyTotal">
+            0h 00m
+        </div>
+
+        <div class="weekly-sub">
+            Single-week maximum: 60 hours
+            <br>
+            48-hour average must also be maintained over the applicable reference period.
+        </div>
+
+        <div id="weeklyWarning" class="warning">
+            ⚠️ You are approaching 60 hours this week.
+        </div>
+
+        <div id="weeklyDanger" class="danger">
+            🚨 60 HOURS REACHED / EXCEEDED
+        </div>
+
     </div>
-    <button class="wtd-primary-btn start" id="mainBtn">Start work</button>
-  </div>
 
-  <div class="wtd-shift-card hidden" id="shiftCard">
-    <div class="wtd-label">Shift spread (since <span id="shiftStartLabel">—</span>)</div>
-    <div class="wtd-shift-time" id="shiftTime">00:00:00</div>
-    <div class="wtd-shift-sub">
-      <span><span id="dailyLimitLabel">13</span>h limit in <b id="dailyRemaining">13:00</b></span>
-      <span>Breaks <b id="shiftBreaksTotal">0 min</b></span>
+
+    <!-- LAST 5 SHIFTS -->
+    <div class="card">
+
+        <div class="section-title">
+            LAST 5 SHIFTS
+        </div>
+
+        <div id="history">
+            <div class="muted" style="text-align:center;">
+                No completed shifts yet.
+            </div>
+        </div>
+
+        <button id="clearHistory" class="small-button">
+            CLEAR HISTORY
+        </button>
+
     </div>
-    <div class="wtd-daily-msg ok" id="dailyMessage">Plenty of time left before your daily limit.</div>
-  </div>
 
-  <div class="wtd-card hidden" id="wtdCard">
-    <div class="wtd-ring-wrap">
-      <svg width="88" height="88" viewBox="0 0 88 88">
-        <circle class="wtd-ring-bg" cx="44" cy="44" r="38"></circle>
-        <circle class="wtd-ring-fg" id="ringFg" cx="44" cy="44" r="38"
-          stroke-dasharray="238.76" stroke-dashoffset="0"></circle>
-      </svg>
-      <div class="wtd-ring-center">
-        <div class="wtd-ring-val" id="wtdRemaining">6:00</div>
-        <div class="wtd-ring-unit">left</div>
-      </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="card">
+
+        <div class="settings-row">
+
+            <div>
+                <strong>Notifications</strong>
+
+                <div id="notificationStatus"
+                     class="notification-status">
+                    Notifications not enabled.
+                </div>
+            </div>
+
+            <button id="notificationButton"
+                    class="small-button"
+                    style="width:auto; margin:0;">
+                ENABLE
+            </button>
+
+        </div>
+
     </div>
-    <div class="wtd-info">
-      <div class="wtd-label">Break needed within 6 hrs of work</div>
-      <div class="wtd-msg ok" id="wtdMessage">Working time under monitoring.</div>
-    </div>
-  </div>
 
-  <div class="wtd-break-row hidden" id="breakPresets">
-    <div class="wtd-label wtd-break-row-label">Take a break</div>
-    <div class="wtd-break-buttons">
-      <button class="wtd-preset-btn" id="preset30Btn" data-min="30">
-        <span class="wtd-preset-min">30</span><span class="wtd-preset-unit">min</span>
-      </button>
-      <button class="wtd-preset-btn" id="preset45Btn" data-min="45">
-        <span class="wtd-preset-min">45</span><span class="wtd-preset-unit">min</span>
-      </button>
-      <button class="wtd-preset-btn ghost" id="freeBreakBtn">
-        <span class="wtd-preset-min">&#8734;</span><span class="wtd-preset-unit">free</span>
-      </button>
-    </div>
-  </div>
 
-  <div class="wtd-active-break hidden" id="activeBreakCard">
-    <div class="wtd-label">Break in progress</div>
-    <div class="wtd-break-timer" id="breakTimerEl">00:00</div>
-    <div class="wtd-break-target" id="breakTargetEl">Free break &mdash; end whenever you're ready</div>
-    <button class="wtd-primary-btn break-end" id="endBreakBtn">End break</button>
-  </div>
-
-  <div class="wtd-log-title hidden" id="logTitle">Today's break log</div>
-  <div id="logList">
-    <div class="wtd-empty-log hidden" id="emptyLog">No breaks logged yet.</div>
-  </div>
-
-  <button class="wtd-endshift-btn hidden" id="endShiftBtn">End shift &amp; reset</button>
+    <footer>
+        WTD Tracker is a personal working-time recording tool.<br>
+        It does not replace your tachograph, employer records or official legal advice.
+    </footer>
 
 </div>
-<script src="/wtd.js"></script>
+
+
 <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/service-worker.js").catch(function (err) {
-        console.log("Service worker registration failed:", err);
-      });
+
+"use strict";
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const STORAGE_KEY = "wtdTrackerData_v1";
+
+
+let state = {
+    currentShift: null,
+    history: [],
+    breakRunning: null
+};
+
+
+/* =========================================================
+   LOAD / SAVE
+========================================================= */
+
+function loadState() {
+
+    try {
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+
+            const parsed = JSON.parse(saved);
+
+            state = {
+                currentShift: parsed.currentShift || null,
+                history: Array.isArray(parsed.history)
+                    ? parsed.history
+                    : [],
+                breakRunning: parsed.breakRunning || null
+            };
+
+        }
+
+    } catch (error) {
+
+        console.error("Could not load WTD data", error);
+
+    }
+
+}
+
+
+function saveState() {
+
+    try {
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(state)
+        );
+
+    } catch (error) {
+
+        console.error("Could not save WTD data", error);
+
+    }
+
+}
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const statusEl = document.getElementById("status");
+
+const workingTimerEl =
+    document.getElementById("workingTimer");
+
+const continuousTimerEl =
+    document.getElementById("continuousTimer");
+
+const startButton =
+    document.getElementById("startButton");
+
+const endButton =
+    document.getElementById("endButton");
+
+const warningBox =
+    document.getElementById("warningBox");
+
+const dangerBox =
+    document.getElementById("dangerBox");
+
+const successBox =
+    document.getElementById("successBox");
+
+const breakRunning =
+    document.getElementById("breakRunning");
+
+const breakCountdown =
+    document.getElementById("breakCountdown");
+
+const todayStart =
+    document.getElementById("todayStart");
+
+const todayEnd =
+    document.getElementById("todayEnd");
+
+const todayBreak =
+    document.getElementById("todayBreak");
+
+const weeklyTotal =
+    document.getElementById("weeklyTotal");
+
+const weeklyWarning =
+    document.getElementById("weeklyWarning");
+
+const weeklyDanger =
+    document.getElementById("weeklyDanger");
+
+const historyEl =
+    document.getElementById("history");
+
+const clearHistoryButton =
+    document.getElementById("clearHistory");
+
+const notificationButton =
+    document.getElementById("notificationButton");
+
+const notificationStatus =
+    document.getElementById("notificationStatus");
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function pad(number) {
+
+    return String(number).padStart(2, "0");
+
+}
+
+
+function formatClock(date) {
+
+    return (
+        pad(date.getHours()) +
+        ":" +
+        pad(date.getMinutes())
+    );
+
+}
+
+
+function formatDate(date) {
+
+    return date.toLocaleDateString(
+        "en-GB",
+        {
+            weekday: "short",
+            day: "2-digit",
+            month: "2-digit"
+        }
+    );
+
+}
+
+
+function formatDuration(seconds) {
+
+    seconds = Math.max(
+        0,
+        Math.floor(seconds)
+    );
+
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
+
+    const secs =
+        seconds % 60;
+
+    return (
+        pad(hours) +
+        ":" +
+        pad(minutes) +
+        ":" +
+        pad(secs)
+    );
+
+}
+
+
+function formatHoursMinutes(seconds) {
+
+    seconds = Math.max(
+        0,
+        Math.floor(seconds)
+    );
+
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
+
+    return `${hours}h ${pad(minutes)}m`;
+
+}
+
+
+function showTemporarySuccess() {
+
+    successBox.style.display = "block";
+
+    setTimeout(() => {
+
+        successBox.style.display = "none";
+
+    }, 5000);
+
+}
+
+
+/* =========================================================
+   AUDIO ALARM
+========================================================= */
+
+let audioContext = null;
+
+
+function playAlarm() {
+
+    try {
+
+        if (!audioContext) {
+
+            audioContext =
+                new (window.AudioContext ||
+                     window.webkitAudioContext)();
+
+        }
+
+        if (audioContext.state === "suspended") {
+
+            audioContext.resume();
+
+        }
+
+        const now =
+            audioContext.currentTime;
+
+        for (let i = 0; i < 3; i++) {
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+            oscillator.type = "sine";
+
+            oscillator.frequency.value =
+                i % 2 === 0 ? 880 : 660;
+
+            gain.gain.setValueAtTime(
+                0.001,
+                now + i * 0.5
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.35,
+                now + i * 0.5 + 0.05
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + i * 0.5 + 0.35
+            );
+
+            oscillator.connect(gain);
+
+            gain.connect(audioContext.destination);
+
+            oscillator.start(
+                now + i * 0.5
+            );
+
+            oscillator.stop(
+                now + i * 0.5 + 0.4
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Audio alarm unavailable",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function updateNotificationStatus() {
+
+    if (!("Notification" in window)) {
+
+        notificationStatus.textContent =
+            "Browser notifications are not supported.";
+
+        notificationButton.style.display =
+            "none";
+
+        return;
+
+    }
+
+    if (Notification.permission === "granted") {
+
+        notificationStatus.textContent =
+            "Notifications enabled.";
+
+        notificationButton.textContent =
+            "ON";
+
+    } else if (
+        Notification.permission === "denied"
+    ) {
+
+        notificationStatus.textContent =
+            "Notifications blocked by browser.";
+
+        notificationButton.textContent =
+            "BLOCKED";
+
+    } else {
+
+        notificationStatus.textContent =
+            "Notifications not enabled.";
+
+        notificationButton.textContent =
+            "ENABLE";
+
+    }
+
+}
+
+
+async function enableNotifications() {
+
+    if (!("Notification" in window)) {
+
+        alert(
+            "This browser does not support notifications."
+        );
+
+        return;
+
+    }
+
+    try {
+
+        const permission =
+            await Notification.requestPermission();
+
+        updateNotificationStatus();
+
+        if (permission === "granted") {
+
+            new Notification(
+                "WTD Tracker",
+                {
+                    body:
+                        "Notifications are now enabled."
+                }
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Notification permission error",
+            error
+        );
+
+    }
+
+}
+
+
+function sendNotification(title, body) {
+
+    playAlarm();
+
+    if (
+        "Notification" in window &&
+        Notification.permission === "granted"
+    ) {
+
+        try {
+
+            new Notification(
+                title,
+                {
+                    body: body,
+                    tag: "wtd-alert"
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Notification failed",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   START SHIFT
+========================================================= */
+
+function startShift() {
+
+    if (state.currentShift) {
+
+        return;
+
+    }
+
+    const now =
+        Date.now();
+
+    state.currentShift = {
+
+        id: now,
+
+        startTime: now,
+
+        endTime: null,
+
+        totalBreakSeconds: 0,
+
+        breaks: [],
+
+        continuousStart: now,
+
+        warningShown: false,
+
+        dangerShown: false
+
+    };
+
+    state.breakRunning = null;
+
+    saveState();
+
+    updateUI();
+
+    playAlarm();
+
+}
+
+
+startButton.addEventListener(
+    "click",
+    startShift
+);
+
+
+/* =========================================================
+   END SHIFT
+========================================================= */
+
+function endShift() {
+
+    if (!state.currentShift) {
+
+        return;
+
+    }
+
+    if (state.breakRunning) {
+
+        alert(
+            "Please finish your break before ending the shift."
+        );
+
+        return;
+
+    }
+
+    const now =
+        Date.now();
+
+    const shift =
+        state.currentShift;
+
+    shift.endTime = now;
+
+    const elapsed =
+        Math.max(
+            0,
+            now - shift.startTime
+        );
+
+    const totalBreak =
+        shift.totalBreakSeconds;
+
+    shift.workingSeconds =
+        Math.max(
+            0,
+            Math.floor(
+                elapsed / 1000
+            ) - totalBreak
+        );
+
+    shift.date =
+        new Date(
+            shift.startTime
+        ).toISOString();
+
+    state.history.unshift(
+        shift
+    );
+
+    /*
+       Keep a useful local history.
+
+       We keep 100 completed shifts locally.
+       The screen displays the latest 5.
+    */
+
+    state.history =
+        state.history.slice(
+            0,
+            100
+        );
+
+    state.currentShift = null;
+
+    state.breakRunning = null;
+
+    saveState();
+
+    updateUI();
+
+    sendNotification(
+        "WTD shift finished",
+        "Your WTD shift has been saved."
+    );
+
+}
+
+
+endButton.addEventListener(
+    "click",
+    endShift
+);
+
+
+/* =========================================================
+   START BREAK
+========================================================= */
+
+function startBreak(minutes) {
+
+    if (!state.currentShift) {
+
+        alert(
+            "Start your shift first."
+        );
+
+        return;
+
+    }
+
+    if (state.breakRunning) {
+
+        return;
+
+    }
+
+    const now =
+        Date.now();
+
+    const duration =
+        minutes * 60;
+
+    state.breakRunning = {
+
+        startTime: now,
+
+        durationSeconds: duration,
+
+        endTime:
+            now +
+            duration * 1000
+
+    };
+
+    /*
+       We pause the continuous working timer
+       while the break is running.
+    */
+
+    saveState();
+
+    updateUI();
+
+}
+
+
+document
+    .querySelectorAll(
+        ".break-options button"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const minutes =
+                    Number(
+                        button.dataset.minutes
+                    );
+
+                startBreak(minutes);
+
+            }
+        );
+
     });
-  }
+
+
+/* =========================================================
+   FINISH BREAK
+========================================================= */
+
+function finishBreak() {
+
+    if (!state.breakRunning) {
+
+        return;
+
+    }
+
+    const breakData =
+        state.breakRunning;
+
+    const actualSeconds =
+        Math.max(
+            0,
+            Math.floor(
+                (
+                    breakData.endTime -
+                    breakData.startTime
+                ) / 1000
+            )
+        );
+
+    const minutes =
+        Math.round(
+            breakData.durationSeconds / 60
+        );
+
+    if (state.currentShift) {
+
+        state.currentShift.totalBreakSeconds +=
+            breakData.durationSeconds;
+
+        state.currentShift.breaks.push({
+
+            startTime:
+                breakData.startTime,
+
+            durationSeconds:
+                breakData.durationSeconds,
+
+            minutes: minutes
+
+        });
+
+        /*
+           A qualifying WTD break interrupts
+           the continuous working-time period.
+
+           Therefore the 6-hour clock starts again
+           after the break.
+        */
+
+        state.currentShift.continuousStart =
+            breakData.endTime;
+
+        state.currentShift.warningShown =
+            false;
+
+        state.currentShift.dangerShown =
+            false;
+
+    }
+
+    state.breakRunning = null;
+
+    saveState();
+
+    updateUI();
+
+    showTemporarySuccess();
+
+    sendNotification(
+        "WTD break finished",
+        `${minutes} minute break recorded.`
+    );
+
+}
+
+
+function checkBreak() {
+
+    if (!state.breakRunning) {
+
+        return;
+
+    }
+
+    const remaining =
+        state.breakRunning.endTime -
+        Date.now();
+
+    if (remaining <= 0) {
+
+        finishBreak();
+
+    }
+
+}
+
+
+/* =========================================================
+   WORKING TIME CALCULATION
+========================================================= */
+
+function getWorkingSeconds(shift) {
+
+    if (!shift) {
+
+        return 0;
+
+    }
+
+    const end =
+        shift.endTime ||
+        Date.now();
+
+    const elapsed =
+        Math.max(
+            0,
+            end - shift.startTime
+        );
+
+    let breakSeconds =
+        shift.totalBreakSeconds || 0;
+
+    /*
+       If a break is currently running,
+       include the elapsed part of that break.
+    */
+
+    if (
+        state.breakRunning &&
+        shift === state.currentShift
+    ) {
+
+        const breakElapsed =
+            Math.max(
+                0,
+                Math.min(
+                    Date.now(),
+                    state.breakRunning.endTime
+                ) -
+                state.breakRunning.startTime
+            );
+
+        breakSeconds +=
+            Math.floor(
+                breakElapsed / 1000
+            );
+
+    }
+
+    return Math.max(
+        0,
+        Math.floor(
+            elapsed / 1000
+        ) -
+        breakSeconds
+    );
+
+}
+
+
+function getContinuousWorkingSeconds() {
+
+    const shift =
+        state.currentShift;
+
+    if (!shift) {
+
+        return 0;
+
+    }
+
+    if (state.breakRunning) {
+
+        return 0;
+
+    }
+
+    return Math.max(
+        0,
+        Math.floor(
+            (
+                Date.now() -
+                shift.continuousStart
+            ) / 1000
+        )
+    );
+
+}
+
+
+/* =========================================================
+   WTD ALERTS
+========================================================= */
+
+function checkWTDAlerts() {
+
+    const shift =
+        state.currentShift;
+
+    if (!shift) {
+
+        return;
+
+    }
+
+    if (state.breakRunning) {
+
+        warningBox.style.display =
+            "none";
+
+        dangerBox.style.display =
+            "none";
+
+        return;
+
+    }
+
+    const continuous =
+        getContinuousWorkingSeconds();
+
+    const warningLimit =
+        5 * 3600 +
+        30 * 60;
+
+    const dangerLimit =
+        6 * 3600;
+
+    /*
+       5h30 warning
+    */
+
+    if (
+        continuous >= warningLimit &&
+        continuous < dangerLimit &&
+        !shift.warningShown
+    ) {
+
+        shift.warningShown =
+            true;
+
+        saveState();
+
+        warningBox.style.display =
+            "block";
+
+        sendNotification(
+            "WTD BREAK REMINDER",
+            "You have 30 minutes until 6 hours of consecutive working time."
+        );
+
+    }
+
+    /*
+       6-hour alert
+    */
+
+    if (
+        continuous >= dangerLimit &&
+        !shift.dangerShown
+    ) {
+
+        shift.dangerShown =
+            true;
+
+        saveState();
+
+        dangerBox.style.display =
+            "block";
+
+        sendNotification(
+            "WTD BREAK DUE",
+            "You have reached 6 hours of consecutive working time. Take your WTD break."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   WEEK CALCULATION
+========================================================= */
+
+function getMonday(date) {
+
+    const d =
+        new Date(date);
+
+    const day =
+        d.getDay();
+
+    const difference =
+        day === 0
+            ? -6
+            : 1 - day;
+
+    d.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+    d.setDate(
+        d.getDate() +
+        difference
+    );
+
+    return d;
+
+}
+
+
+function getWeeklySeconds() {
+
+    const now =
+        new Date();
+
+    const monday =
+        getMonday(now);
+
+    const mondayTime =
+        monday.getTime();
+
+    const sunday =
+        mondayTime +
+        7 * 24 * 60 * 60 * 1000;
+
+    let total =
+        0;
+
+    state.history.forEach(
+        shift => {
+
+            const time =
+                new Date(
+                    shift.startTime
+                ).getTime();
+
+            if (
+                time >= mondayTime &&
+                time < sunday
+            ) {
+
+                total +=
+                    shift.workingSeconds || 0;
+
+            }
+
+        }
+    );
+
+    /*
+       Include the current shift.
+    */
+
+    if (state.currentShift) {
+
+        const time =
+            state.currentShift.startTime;
+
+        if (
+            time >= mondayTime &&
+            time < sunday
+        ) {
+
+            total +=
+                getWorkingSeconds(
+                    state.currentShift
+                );
+
+        }
+
+    }
+
+    return total;
+
+}
+
+
+/* =========================================================
+   WEEK DISPLAY
+========================================================= */
+
+function updateWeeklyDisplay() {
+
+    const seconds =
+        getWeeklySeconds();
+
+    weeklyTotal.textContent =
+        formatHoursMinutes(
+            seconds
+        );
+
+    const hours =
+        seconds / 3600;
+
+    weeklyWarning.style.display =
+        "none";
+
+    weeklyDanger.style.display =
+        "none";
+
+    if (
+        hours >= 55 &&
+        hours < 60
+    ) {
+
+        weeklyWarning.style.display =
+            "block";
+
+    }
+
+    if (hours >= 60) {
+
+        weeklyDanger.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function renderHistory() {
+
+    if (
+        !state.history ||
+        state.history.length === 0
+    ) {
+
+        historyEl.innerHTML =
+            `<div class="muted" style="text-align:center;">
+                No completed shifts yet.
+             </div>`;
+
+        return;
+
+    }
+
+    const latest =
+        state.history.slice(
+            0,
+            5
+        );
+
+    historyEl.innerHTML =
+        "";
+
+    latest.forEach(
+        shift => {
+
+            const date =
+                new Date(
+                    shift.startTime
+                );
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+            row.className =
+                "day";
+
+            const left =
+                document.createElement(
+                    "div"
+                );
+
+            left.className =
+                "day-left";
+
+            const dateElement =
+                document.createElement(
+                    "div"
+                );
+
+            dateElement.className =
+                "day-date";
+
+            dateElement.textContent =
+                formatDate(date);
+
+            const timeElement =
+                document.createElement(
+                    "div"
+                );
+
+            timeElement.className =
+                "day-time";
+
+            timeElement.textContent =
+                `${formatClock(
+                    new Date(
+                        shift.startTime
+                    )
+                )} → ${formatClock(
+                    new Date(
+                        shift.endTime
+                    )
+                )}`;
+
+            left.appendChild(
+                dateElement
+            );
+
+            left.appendChild(
+                timeElement
+            );
+
+            const right =
+                document.createElement(
+                    "div"
+                );
+
+            right.className =
+                "day-hours";
+
+            right.textContent =
+                formatHoursMinutes(
+                    shift.workingSeconds || 0
+                );
+
+            row.appendChild(
+                left
+            );
+
+            row.appendChild(
+                right
+            );
+
+            historyEl.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TODAY DISPLAY
+========================================================= */
+
+function updateToday() {
+
+    if (!state.currentShift) {
+
+        /*
+           Find today's most recent completed shift.
+        */
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        const todayStartTime =
+            today.getTime();
+
+        const tomorrow =
+            todayStartTime +
+            24 * 60 * 60 * 1000;
+
+        const todayShift =
+            state.history.find(
+                shift =>
+                    shift.startTime >=
+                        todayStartTime &&
+                    shift.startTime <
+                        tomorrow
+            );
+
+        if (todayShift) {
+
+            todayStart.textContent =
+                formatClock(
+                    new Date(
+                        todayShift.startTime
+                    )
+                );
+
+            todayEnd.textContent =
+                formatClock(
+                    new Date(
+                        todayShift.endTime
+                    )
+                );
+
+            todayBreak.textContent =
+                `${Math.round(
+                    (todayShift.totalBreakSeconds || 0) /
+                    60
+                )} min`;
+
+        } else {
+
+            todayStart.textContent =
+                "--:--";
+
+            todayEnd.textContent =
+                "--:--";
+
+            todayBreak.textContent =
+                "0 min";
+
+        }
+
+        return;
+
+    }
+
+    todayStart.textContent =
+        formatClock(
+            new Date(
+                state.currentShift.startTime
+            )
+        );
+
+    todayEnd.textContent =
+        "WORKING";
+
+    todayBreak.textContent =
+        `${Math.round(
+            state.currentShift.totalBreakSeconds / 60
+        )} min`;
+
+}
+
+
+/* =========================================================
+   BREAK DISPLAY
+========================================================= */
+
+function updateBreakDisplay() {
+
+    if (!state.breakRunning) {
+
+        breakRunning.style.display =
+            "none";
+
+        return;
+
+    }
+
+    breakRunning.style.display =
+        "block";
+
+    const remaining =
+        Math.max(
+            0,
+            state.breakRunning.endTime -
+            Date.now()
+        );
+
+    breakCountdown.textContent =
+        formatDuration(
+            Math.ceil(
+                remaining / 1000
+            )
+        );
+
+}
+
+
+/* =========================================================
+   MAIN UI
+========================================================= */
+
+function updateUI() {
+
+    const shift =
+        state.currentShift;
+
+    if (!shift) {
+
+        statusEl.textContent =
+            "SHIFT NOT STARTED";
+
+        workingTimerEl.textContent =
+            "00:00:00";
+
+        continuousTimerEl.textContent =
+            "00:00:00";
+
+        startButton.style.display =
+            "block";
+
+        endButton.style.display =
+            "none";
+
+        warningBox.style.display =
+            "none";
+
+        dangerBox.style.display =
+            "none";
+
+    } else {
+
+        statusEl.textContent =
+            state.breakRunning
+                ? "ON WTD BREAK"
+                : "WORKING";
+
+        workingTimerEl.textContent =
+            formatDuration(
+                getWorkingSeconds(
+                    shift
+                )
+            );
+
+        continuousTimerEl.textContent =
+            formatDuration(
+                getContinuousWorkingSeconds()
+            );
+
+        startButton.style.display =
+            "none";
+
+        endButton.style.display =
+            "block";
+
+    }
+
+    updateBreakDisplay();
+
+    updateToday();
+
+    updateWeeklyDisplay();
+
+    renderHistory();
+
+}
+
+
+/* =========================================================
+   CLEAR HISTORY
+========================================================= */
+
+clearHistoryButton.addEventListener(
+    "click",
+    () => {
+
+        const answer =
+            confirm(
+                "Delete all saved WTD history?"
+            );
+
+        if (!answer) {
+
+            return;
+
+        }
+
+        state.history = [];
+
+        saveState();
+
+        updateUI();
+
+    }
+);
+
+
+/* =========================================================
+   NOTIFICATION BUTTON
+========================================================= */
+
+notificationButton.addEventListener(
+    "click",
+    enableNotifications
+);
+
+
+/* =========================================================
+   STARTUP
+========================================================= */
+
+loadState();
+
+updateNotificationStatus();
+
+updateUI();
+
+
+/* =========================================================
+   MAIN TIMER
+========================================================= */
+
+setInterval(
+    () => {
+
+        checkBreak();
+
+        checkWTDAlerts();
+
+        updateUI();
+
+    },
+    1000
+);
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        /*
+           When the user returns to the app,
+           immediately recalculate everything
+           using real timestamps.
+        */
+
+        checkBreak();
+
+        checkWTDAlerts();
+
+        updateUI();
+
+    }
+);
+
+
+/* =========================================================
+   SAFETY: BEFORE LEAVING PAGE
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        saveState();
+
+    }
+);
+
 </script>
+
 </body>
 </html>
