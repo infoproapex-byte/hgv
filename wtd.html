@@ -788,125 +788,151 @@ function playAlarm() {
    NOTIFICATIONS
 ========================================================= */
 
-function updateNotificationStatus() {
+    /* =========================================================
+       NOTIFICATIONS
+    ========================================================= */
 
-    if (!("Notification" in window)) {
+    function updateNotificationStatus() {
 
-        notificationStatus.textContent =
-            "Browser notifications are not supported.";
+        if (!("Notification" in window)) {
 
-        notificationButton.style.display =
-            "none";
+            notificationStatus.textContent =
+                "Browser notifications are not supported.";
 
-        return;
+            notificationButton.style.display =
+                "none";
 
-    }
-
-    if (Notification.permission === "granted") {
-
-        notificationStatus.textContent =
-            "Notifications enabled.";
-
-        notificationButton.textContent =
-            "ON";
-
-    } else if (
-        Notification.permission === "denied"
-    ) {
-
-        notificationStatus.textContent =
-            "Notifications blocked by browser.";
-
-        notificationButton.textContent =
-            "BLOCKED";
-
-    } else {
-
-        notificationStatus.textContent =
-            "Notifications not enabled.";
-
-        notificationButton.textContent =
-            "ENABLE";
-
-    }
-
-}
-
-
-async function enableNotifications() {
-
-    if (!("Notification" in window)) {
-
-        alert(
-            "This browser does not support notifications."
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const permission =
-            await Notification.requestPermission();
-
-        updateNotificationStatus();
-
-        if (permission === "granted") {
-
-            new Notification(
-                "WTD Tracker",
-                {
-                    body:
-                        "Notifications are now enabled."
-                }
-            );
-
+            return;
         }
 
-    } catch (error) {
+        if (Notification.permission === "granted") {
 
-        console.error(
-            "Notification permission error",
-            error
-        );
+            notificationStatus.textContent =
+                "Notifications enabled.";
 
+            notificationButton.textContent =
+                "ON";
+
+        } else if (Notification.permission === "denied") {
+
+            notificationStatus.textContent =
+                "Notifications blocked by browser.";
+
+            notificationButton.textContent =
+                "BLOCKED";
+
+        } else {
+
+            notificationStatus.textContent =
+                "Notifications not enabled.";
+
+            notificationButton.textContent =
+                "ENABLE";
+        }
     }
 
-}
 
+    async function enableNotifications() {
 
-function sendNotification(title, body) {
+        if (!("Notification" in window)) {
 
-    playAlarm();
+            alert(
+                "This browser does not support notifications."
+            );
 
-    if (
-        "Notification" in window &&
-        Notification.permission === "granted"
-    ) {
+            return;
+        }
 
         try {
 
-            new Notification(
+            const permission =
+                await Notification.requestPermission();
+
+            updateNotificationStatus();
+
+            if (permission === "granted") {
+
+                if ("serviceWorker" in navigator) {
+
+                    const registration =
+                        await navigator.serviceWorker.ready;
+
+                    await registration.showNotification(
+                        "WTD Tracker",
+                        {
+                            body:
+                                "Notifications are now enabled.",
+                            icon:
+                                "/icons/icon-192.png",
+                            badge:
+                                "/icons/icon-192.png",
+                            tag:
+                                "wtd-enabled"
+                        }
+                    );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Notification permission error",
+                error
+            );
+
+        }
+    }
+
+
+    async function sendNotification(title, body) {
+
+        playAlarm();
+
+        try {
+
+            if (!("Notification" in window)) {
+                return;
+            }
+
+            if (Notification.permission !== "granted") {
+                return;
+            }
+
+            if (!("serviceWorker" in navigator)) {
+                return;
+            }
+
+            const registration =
+                await navigator.serviceWorker.ready;
+
+            await registration.showNotification(
                 title,
                 {
                     body: body,
-                    tag: "wtd-alert"
+                    icon:
+                        "/icons/icon-192.png",
+                    badge:
+                        "/icons/icon-192.png",
+                    tag:
+                        "wtd-alert-" + title,
+                    renotify:
+                        true,
+                    vibrate:
+                        [300, 150, 300]
                 }
             );
 
         } catch (error) {
 
             console.error(
-                "Notification failed",
+                "Notification failed:",
                 error
             );
 
         }
-
     }
-
-}
 
 
 /* =========================================================
