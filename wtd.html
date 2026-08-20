@@ -2,652 +2,1343 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>WTD Tracker</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
+
+<meta name="theme-color" content="#07111f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HGV WTD">
+
+<title>HGV WTD Timer</title>
+
 <style>
-  :root{
-    --asphalt: #0B0E11;
-    --panel: #151A1F;
-    --panel-raised: #1D242B;
-    --hairline: #2A323A;
-    --amber: #FFB020;
-    --amber-dim: #8A5F16;
-    --hazard: #E8432B;
-    --go: #35C97A;
-    --text: #E7E9EC;
-    --muted: #8B95A1;
-    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --grot: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--asphalt);color:var(--text);font-family:var(--grot);}
-  body{
-    min-height:100vh;
-    padding:20px 16px 60px;
-    display:flex;
-    justify-content:center;
-  }
-  .wrap{width:100%;max-width:460px;}
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-  /* Header — plate style */
-  .plate{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    padding-bottom:14px;
-    border-bottom:3px solid var(--amber);
-    margin-bottom:18px;
-  }
-  .plate h1{
-    font-family:var(--mono);
-    font-weight:700;
-    font-size:22px;
-    letter-spacing:2px;
-    margin:0;
-  }
-  .plate .sub{
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:1px;
-    text-transform:uppercase;
-  }
-  .status-chip{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:5px 10px;
-    border-radius:3px;
-    border:1px solid var(--hairline);
-    color:var(--muted);
-    white-space:nowrap;
-  }
-  .status-chip.working{color:var(--go);border-color:var(--go);}
-  .status-chip.break{color:var(--amber);border-color:var(--amber);}
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #07111f;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, Arial, sans-serif;
+}
 
-  /* Digital readout panel */
-  .dash{
-    background:var(--panel);
-    border:1px solid var(--hairline);
-    border-radius:6px;
-    padding:20px;
-    margin-bottom:14px;
-  }
-  .readout-row{display:flex;gap:12px;}
-  .readout{
-    flex:1;
-    background:#000;
-    border-radius:4px;
-    padding:14px 12px;
-    text-align:center;
-    border:1px solid #262E36;
-  }
-  .readout .label{
-    font-size:10px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin-bottom:6px;
-  }
-  .readout .value{
-    font-family:var(--mono);
-    font-size:26px;
-    font-weight:700;
-    color:var(--amber);
-    letter-spacing:1px;
-    font-variant-numeric:tabular-nums;
-  }
-  .readout.alert .value{color:var(--hazard);}
+body {
+    display: flex;
+    justify-content: center;
+}
 
-  .btn-row{display:flex;gap:10px;margin-top:16px;}
-  button{
-    font-family:var(--grot);
-    font-weight:700;
-    font-size:14px;
-    letter-spacing:0.5px;
-    border-radius:4px;
-    border:none;
-    padding:14px 12px;
-    cursor:pointer;
-    flex:1;
-    transition:filter .15s ease, transform .05s ease;
-  }
-  button:active{transform:scale(0.98);}
-  .btn-start{background:var(--go);color:#04150C;}
-  .btn-end{background:var(--hazard);color:#1A0603;}
-  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--hairline);}
-  .btn-amber{background:var(--amber);color:#241700;}
-  button:disabled{opacity:0.35;cursor:not-allowed;}
+.app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100vh;
+    padding: 18px 16px 35px;
+}
 
-  /* Banners */
-  .banner{
-    display:none;
-    align-items:flex-start;
-    gap:10px;
-    padding:12px 14px;
-    border-radius:4px;
-    font-size:13px;
-    line-height:1.4;
-    margin-bottom:14px;
-  }
-  .banner.show{display:flex;}
-  .banner .icon{font-size:16px;line-height:1;}
-  .banner.reminder{background:rgba(255,176,32,0.12);border:1px solid var(--amber-dim);color:var(--amber);}
-  .banner.due{background:rgba(232,67,43,0.14);border:1px solid var(--hazard);color:#FF8B77;}
-  .banner.ok{background:rgba(53,201,122,0.10);border:1px solid #1E6E45;color:var(--go);}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-  /* Break picker */
-  .break-panel{
-    background:var(--panel);
-    border:1px solid var(--hairline);
-    border-radius:6px;
-    padding:18px;
-    margin-bottom:14px;
-  }
-  .break-panel h3{margin:0 0 4px;font-size:14px;}
-  .break-panel p{margin:0 0 12px;font-size:12px;color:var(--muted);}
-  .break-opts{display:flex;gap:8px;}
-  .break-opts button{background:var(--panel-raised);color:var(--text);border:1px solid var(--hairline);font-family:var(--mono);}
-  .break-opts button.active{background:var(--amber);color:#241700;border-color:var(--amber);}
+.logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
 
-  .break-progress{
-    text-align:center;
-    padding:20px 0 6px;
-  }
-  .break-progress .value{font-family:var(--mono);font-size:32px;color:var(--amber);font-variant-numeric:tabular-nums;}
-  .break-progress .cap{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+.logo span {
+    color: #4ade80;
+}
 
-  /* Section cards */
-  .card{
-    background:var(--panel);
-    border:1px solid var(--hairline);
-    border-radius:6px;
-    padding:16px 18px;
-    margin-bottom:14px;
-  }
-  .card h3{
-    margin:0 0 10px;
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--muted);
-  }
-  .kv{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
-  .kv .k{color:var(--muted);}
-  .kv .v{font-family:var(--mono);}
+.status-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #64748b;
+    box-shadow: 0 0 12px rgba(100,116,139,.5);
+}
 
-  .week-total{
-    font-family:var(--mono);
-    font-size:30px;
-    font-weight:700;
-    color:var(--text);
-  }
-  .week-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px;}
-  .week-bar{
-    height:8px;background:#000;border-radius:4px;overflow:hidden;margin:12px 0 4px;border:1px solid var(--hairline);
-  }
-  .week-bar-fill{height:100%;background:var(--go);transition:width .3s ease, background .3s ease;}
-  .week-bar-fill.warn{background:var(--amber);}
-  .week-bar-fill.over{background:var(--hazard);}
+.status-dot.active {
+    background: #22c55e;
+    box-shadow: 0 0 14px rgba(34,197,94,.8);
+}
 
-  .shift-row{
-    display:flex;justify-content:space-between;font-size:12.5px;
-    padding:8px 0;border-bottom:1px solid var(--hairline);
-    color:var(--text);
-  }
-  .shift-row:last-child{border-bottom:none;}
-  .shift-row .d{color:var(--muted);}
-  .empty{color:var(--muted);font-size:12.5px;text-align:center;padding:10px 0;}
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1d3048;
+    border-radius: 22px;
+    padding: 22px;
+    margin-bottom: 15px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.18);
+}
 
-  .link-btn{
-    background:none;border:none;color:var(--muted);font-size:11px;
-    text-decoration:underline;cursor:pointer;padding:0;font-family:var(--grot);
-  }
+.label {
+    color: #8fa4bb;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+}
 
-  .notif-row{display:flex;align-items:center;justify-content:space-between;}
-  .notif-row .stat{font-size:12.5px;color:var(--muted);}
-  .notif-row .stat.on{color:var(--go);}
-  .notif-row button{flex:none;padding:8px 16px;font-size:12px;}
+.main-timer {
+    font-size: clamp(48px, 14vw, 78px);
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: -2px;
+    margin: 8px 0 4px;
+    font-variant-numeric: tabular-nums;
+}
 
-  footer{
-    text-align:center;font-size:11px;color:var(--muted);line-height:1.6;
-    margin-top:20px;padding:0 10px;
-  }
+.timer-green {
+    color: #4ade80;
+}
+
+.timer-orange {
+    color: #fbbf24;
+}
+
+.timer-red {
+    color: #f87171;
+}
+
+.status {
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    margin-top: 6px;
+}
+
+.status.safe {
+    color: #4ade80;
+}
+
+.status.warning {
+    color: #fbbf24;
+}
+
+.status.danger {
+    color: #f87171;
+}
+
+.progress {
+    height: 10px;
+    background: #17283d;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #22c55e;
+    transition: width .5s linear;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.info-box {
+    background: #091625;
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+}
+
+.info-title {
+    font-size: 11px;
+    color: #8195aa;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+button {
+    width: 100%;
+    border: none;
+    border-radius: 17px;
+    padding: 18px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    color: white;
+}
+
+button:active {
+    transform: scale(.98);
+}
+
+.btn-start {
+    background: #16a34a;
+}
+
+.btn-break {
+    background: #2563eb;
+}
+
+.btn-stop {
+    background: #dc2626;
+}
+
+.btn-end-break {
+    background: #16a34a;
+}
+
+.btn-secondary {
+    background: #17283d;
+    color: #d7e2ee;
+}
+
+button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.break-card {
+    display: none;
+}
+
+.break-card.visible {
+    display: block;
+}
+
+.break-timer {
+    font-size: 55px;
+    text-align: center;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    margin: 8px 0;
+}
+
+.break-message {
+    text-align: center;
+    color: #a8b8ca;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.break-progress {
+    height: 12px;
+    background: #17283d;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.break-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
+}
+
+.history-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.history-empty {
+    color: #71849a;
+    text-align: center;
+    font-size: 14px;
+    padding: 12px 0;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid #1b2d43;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    font-size: 13px;
+    color: #9db0c3;
+}
+
+.history-hours {
+    font-weight: 800;
+}
+
+.notice {
+    display: none;
+    border-radius: 15px;
+    padding: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.notice.visible {
+    display: block;
+}
+
+.notice.warning {
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.35);
+    color: #fbbf24;
+}
+
+.notice.danger {
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.35);
+    color: #f87171;
+}
+
+.footer {
+    text-align: center;
+    color: #52677d;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 25px;
+}
+
+@media (max-width: 360px) {
+    .app {
+        padding: 14px 12px 25px;
+    }
+
+    .card {
+        padding: 17px;
+    }
+
+    .main-timer {
+        font-size: 48px;
+    }
+}
 </style>
 </head>
+
 <body>
-<div class="wrap">
 
-  <div class="plate">
-    <div>
-      <h1>WTD TRACKER</h1>
-      <div class="sub">UK HGV Working Time</div>
+<div class="app">
+
+    <div class="header">
+        <div class="logo">HGV <span>WTD</span></div>
+        <div id="statusDot" class="status-dot"></div>
     </div>
-    <div class="status-chip" id="statusChip">SHIFT NOT STARTED</div>
-  </div>
 
-  <div class="banner reminder" id="bannerReminder">
-    <span class="icon">⚠️</span>
-    <span>WTD BREAK REMINDER — <span id="reminderMins">30</span> minutes until 6 hours.</span>
-  </div>
-  <div class="banner due" id="bannerDue">
-    <span class="icon">🚨</span>
-    <span>WTD BREAK DUE — you've reached 6 hours of consecutive working time.</span>
-  </div>
-  <div class="banner ok" id="bannerOk">
-    <span class="icon">✅</span>
-    <span>Break recorded.</span>
-  </div>
+    <div id="notice" class="notice"></div>
 
-  <div class="dash">
-    <div class="readout-row">
-      <div class="readout" id="workingReadout">
-        <div class="label">Working Time</div>
-        <div class="value" id="workingTime">00:00:00</div>
-      </div>
-      <div class="readout" id="consecReadout">
-        <div class="label">Consecutive</div>
-        <div class="value" id="consecTime">00:00:00</div>
-      </div>
+    <!-- MAIN TIMER -->
+    <div class="card">
+
+        <div class="label">6-Hour Working Period</div>
+
+        <div id="mainTimer" class="main-timer timer-green">
+            06:00:00
+        </div>
+
+        <div id="mainStatus" class="status safe">
+            READY TO START
+        </div>
+
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <button id="startButton"
+                class="btn-start"
+                onclick="startShift()">
+            START SHIFT
+        </button>
+
+        <button id="breakButton"
+                class="btn-break"
+                onclick="startBreak()"
+                style="display:none;">
+            START BREAK
+        </button>
+
+        <button id="stopButton"
+                class="btn-stop"
+                onclick="stopShift()"
+                style="display:none;">
+            END SHIFT
+        </button>
+
     </div>
-    <div class="btn-row">
-      <button class="btn-start" id="startBtn">Start Work</button>
-      <button class="btn-end" id="endBtn" disabled>End Work</button>
-    </div>
-    <div class="btn-row" id="breakRow" style="display:none;">
-      <button class="btn-amber" id="takeBreakBtn">Take a WTD Break</button>
-    </div>
-  </div>
 
-  <div class="break-panel" id="breakPicker" style="display:none;">
-    <h3>WTD Break</h3>
-    <p>Select the break you are taking.</p>
-    <div class="break-opts">
-      <button data-mins="15">15 MIN</button>
-      <button data-mins="30">30 MIN</button>
-      <button data-mins="45">45 MIN</button>
+    <!-- BREAK -->
+    <div id="breakCard" class="card break-card">
+
+        <div class="label">Break Timer</div>
+
+        <div id="breakTimer" class="break-timer">
+            00:00
+        </div>
+
+        <div id="breakMessage" class="break-message">
+            Minimum qualifying break: 15 minutes
+        </div>
+
+        <div class="break-progress">
+            <div id="breakProgressBar"
+                 class="break-progress-bar"></div>
+        </div>
+
+        <button id="endBreakButton"
+                class="btn-end-break"
+                onclick="endBreak()"
+                disabled>
+            END BREAK
+        </button>
+
     </div>
-  </div>
 
-  <div class="break-panel" id="breakActive" style="display:none;">
-    <h3>Break in progress</h3>
-    <div class="break-progress">
-      <div class="value" id="breakRemaining">00:00</div>
-      <div class="cap">Working time is paused</div>
+    <!-- SHIFT INFORMATION -->
+    <div class="card">
+
+        <div class="info-grid">
+
+            <div class="info-box">
+                <div class="info-title">Shift Started</div>
+                <div id="shiftStart" class="info-value">--:--</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">Working Today</div>
+                <div id="dailyHours" class="info-value">00:00</div>
+            </div>
+
+        </div>
+
     </div>
-    <div class="btn-row">
-      <button class="btn-ghost" id="endBreakBtn">End Break Now</button>
+
+    <!-- HISTORY -->
+    <div class="card">
+
+        <div class="history-title">
+            Shift History
+        </div>
+
+        <div id="history"></div>
+
+        <button class="btn-secondary"
+                onclick="clearHistory()">
+            CLEAR HISTORY
+        </button>
+
     </div>
-  </div>
 
-  <div class="card">
-    <h3>Today</h3>
-    <div class="kv"><span class="k">Start</span><span class="v" id="todayStart">--:--</span></div>
-    <div class="kv"><span class="k">End</span><span class="v" id="todayEnd">--:--</span></div>
-    <div class="kv"><span class="k">Breaks</span><span class="v" id="todayBreaks">0 min</span></div>
-  </div>
-
-  <div class="card">
-    <h3>This Week</h3>
-    <div class="week-total" id="weekTotal">0h 00m</div>
-    <div class="week-bar"><div class="week-bar-fill" id="weekBarFill" style="width:0%;"></div></div>
-    <div class="week-note">Single-week maximum: 60 hours. 48-hour average must also be maintained over the applicable reference period.</div>
-    <div class="banner reminder" id="weekWarn" style="margin-top:10px;"><span class="icon">⚠️</span><span>You are approaching 60 hours this week.</span></div>
-    <div class="banner due" id="weekOver" style="margin-top:10px;"><span class="icon">🚨</span><span>60 hours reached or exceeded.</span></div>
-  </div>
-
-  <div class="card">
-    <h3>Last 5 Shifts</h3>
-    <div id="shiftHistory"><div class="empty">No completed shifts yet.</div></div>
-    <div style="text-align:right;margin-top:8px;">
-      <button class="link-btn" id="clearHistoryBtn">Clear history</button>
+    <div class="footer">
+        HGV Working Time Directive Timer<br>
+        Always follow the applicable UK WTD rules and your employer's instructions.
     </div>
-  </div>
 
-  <div class="card">
-    <h3>Notifications</h3>
-    <div class="notif-row">
-      <span class="stat" id="notifStat">Notifications not enabled.</span>
-      <button class="btn-ghost" id="enableNotifBtn">Enable</button>
-    </div>
-  </div>
-
-  <footer>
-    WTD Tracker is a personal working-time recording tool.<br>
-    It does not replace your tachograph, employer records or official legal advice.<br>
-    Notifications only fire while this tab is open in your browser.
-  </footer>
 </div>
 
 <script>
-(function(){
-  const STORE_KEY = 'wtd-app-state';
-  const SIX_HOURS = 6*3600;
-  const REMINDER_AT = SIX_HOURS - 30*60;
-  const WEEK_MAX = 60*3600;
-  const WEEK_WARN = 55*3600;
+"use strict";
 
-  let state = {
-    shiftStatus: 'idle', // idle | working | break
-    workStartAt: null,        // epoch ms - when current shift started
-    accumulatedWorkSec: 0,    // total working seconds banked before current running segment
-    segmentStartAt: null,     // epoch ms - start of current running work segment (null if on break)
-    consecStartAt: null,      // epoch ms - start of current consecutive-work window (reset on break)
-    consecAccumSec: 0,        // consecutive seconds banked before current running segment
-    breakStatus: null,        // null | {mins, startAt}
-    breakTotalTodaySec: 0,
-    todayStart: null,
-    todayEnd: null,
-    weekId: null,
-    weekSeconds: 0,
-    history: [],              // [{date, start, end, durationSec, breakMin}]
-    remindedShown: false,
-    dueShown: false,
-    weekWarnShown: false,
-    weekOverShown: false,
-    notifsEnabled: false
-  };
+/* =========================================================
+   SETTINGS
+========================================================= */
 
-  function isoWeekId(d){
-    const date = new Date(d);
-    date.setHours(0,0,0,0);
-    date.setDate(date.getDate() + 3 - (date.getDay()+6)%7);
-    const week1 = new Date(date.getFullYear(),0,4);
-    const wk = 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay()+6)%7)/7);
-    return date.getFullYear()+'-W'+wk;
-  }
+const WORK_LIMIT = 6 * 60 * 60;
 
-  async function save(){
-    try{
-      await window.storage.set(STORE_KEY, JSON.stringify(state), false);
-    }catch(e){ console.error('save failed', e); }
-  }
+const WARNING_TIME = 30 * 60;
 
-  async function load(){
-    try{
-      const res = await window.storage.get(STORE_KEY, false);
-      if(res && res.value){
-        const loaded = JSON.parse(res.value);
-        state = Object.assign(state, loaded);
-      }
-    }catch(e){
-      // no saved state yet
+const MIN_BREAK = 15 * 60;
+
+const STORAGE_KEY = "hgv_wtd_timer_v1";
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let state = {
+    shiftActive: false,
+    breakActive: false,
+
+    shiftStart: null,
+
+    workPeriodStart: null,
+
+    breakStart: null,
+
+    totalWorkedBeforeCurrentPeriod: 0,
+
+    history: []
+};
+
+
+/* =========================================================
+   LOAD / SAVE
+========================================================= */
+
+function saveState() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
+    );
+}
+
+
+function loadState() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) return;
+
+        const parsed = JSON.parse(saved);
+
+        state = {
+            ...state,
+            ...parsed
+        };
+
+    } catch (error) {
+
+        console.error(error);
+
     }
-    const wk = isoWeekId(Date.now());
-    if(state.weekId !== wk){
-      state.weekId = wk;
-      state.weekSeconds = 0;
-      state.weekWarnShown = false;
-      state.weekOverShown = false;
-    }
-    render();
-  }
+}
 
-  function fmtHMS(totalSec){
-    totalSec = Math.max(0, Math.floor(totalSec));
-    const h = String(Math.floor(totalSec/3600)).padStart(2,'0');
-    const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
-    const s = String(totalSec%60).padStart(2,'0');
-    return h+':'+m+':'+s;
-  }
-  function fmtMS(totalSec){
-    totalSec = Math.max(0, Math.floor(totalSec));
-    const m = String(Math.floor(totalSec/60)).padStart(2,'0');
-    const s = String(totalSec%60).padStart(2,'0');
-    return m+':'+s;
-  }
-  function fmtClock(ts){
-    if(!ts) return '--:--';
-    const d = new Date(ts);
-    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  }
-  function fmtHM(totalSec){
-    totalSec = Math.max(0, Math.floor(totalSec));
-    const h = Math.floor(totalSec/3600);
-    const m = Math.floor((totalSec%3600)/60);
-    return h+'h '+String(m).padStart(2,'0')+'m';
-  }
 
-  function currentWorkingSec(){
-    let sec = state.accumulatedWorkSec;
-    if(state.shiftStatus === 'working' && state.segmentStartAt){
-      sec += (Date.now() - state.segmentStartAt)/1000;
-    }
-    return sec;
-  }
-  function currentConsecSec(){
-    let sec = state.consecAccumSec;
-    if(state.shiftStatus === 'working' && state.segmentStartAt){
-      sec += (Date.now() - state.segmentStartAt)/1000;
-    }
-    return sec;
-  }
-  function currentWeekSec(){
-    let sec = state.weekSeconds;
-    if(state.shiftStatus === 'working' && state.segmentStartAt){
-      sec += (Date.now() - state.segmentStartAt)/1000;
-    }
-    return sec;
-  }
+/* =========================================================
+   TIME HELPERS
+========================================================= */
 
-  function notify(title, body){
-    if(state.notifsEnabled && 'Notification' in window && Notification.permission === 'granted'){
-      try{ new Notification(title, {body}); }catch(e){}
-    }
-  }
+function formatTime(seconds) {
 
-  // ---- Actions ----
-  async function startWork(){
-    const now = Date.now();
-    state.shiftStatus = 'working';
-    state.workStartAt = now;
-    state.segmentStartAt = now;
-    state.consecStartAt = now;
-    state.accumulatedWorkSec = 0;
-    state.consecAccumSec = 0;
-    state.breakTotalTodaySec = 0;
-    state.todayStart = now;
-    state.todayEnd = null;
-    state.remindedShown = false;
-    state.dueShown = false;
-    document.getElementById('bannerReminder').classList.remove('show');
-    document.getElementById('bannerDue').classList.remove('show');
-    await save();
-    render();
-  }
+    seconds = Math.max(0, Math.floor(seconds));
 
-  async function endWork(){
-    if(state.shiftStatus === 'working' && state.segmentStartAt){
-      const now = Date.now();
-      state.accumulatedWorkSec += (now - state.segmentStartAt)/1000;
-      state.weekSeconds += (now - state.segmentStartAt)/1000;
-      state.segmentStartAt = null;
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
+
+    const secs =
+        seconds % 60;
+
+    return [
+        String(hours).padStart(2, "0"),
+        String(minutes).padStart(2, "0"),
+        String(secs).padStart(2, "0")
+    ].join(":");
+}
+
+
+function formatShortTime(seconds) {
+
+    seconds = Math.max(0, Math.floor(seconds));
+
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
+
+    return [
+        String(hours).padStart(2, "0"),
+        String(minutes).padStart(2, "0")
+    ].join(":");
+}
+
+
+function getNow() {
+
+    return Date.now();
+
+}
+
+
+/* =========================================================
+   SHIFT
+========================================================= */
+
+function startShift() {
+
+    if (state.shiftActive) return;
+
+    const now = getNow();
+
+    state.shiftActive = true;
+    state.breakActive = false;
+
+    state.shiftStart = now;
+
+    state.workPeriodStart = now;
+
+    state.breakStart = null;
+
+    state.totalWorkedBeforeCurrentPeriod = 0;
+
+    saveState();
+
+    updateUI();
+}
+
+
+function stopShift() {
+
+    if (!state.shiftActive) return;
+
+    const now = getNow();
+
+    let workedSeconds =
+        state.totalWorkedBeforeCurrentPeriod;
+
+    if (!state.breakActive) {
+
+        workedSeconds +=
+            Math.max(
+                0,
+                Math.floor(
+                    (now - state.workPeriodStart) / 1000
+                )
+            );
+
     }
-    const now = Date.now();
-    state.todayEnd = now;
+
+    const date =
+        new Date(state.shiftStart)
+        .toLocaleDateString(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
+        );
+
     state.history.unshift({
-      date: new Date(state.todayStart || now).toLocaleDateString(),
-      start: fmtClock(state.todayStart),
-      end: fmtClock(now),
-      durationSec: state.accumulatedWorkSec,
-      breakMin: Math.round(state.breakTotalTodaySec/60)
+
+        date: date,
+
+        start:
+            new Date(state.shiftStart)
+            .toLocaleTimeString(
+                "en-GB",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            ),
+
+        worked: workedSeconds
+
     });
-    state.history = state.history.slice(0,5);
-    state.shiftStatus = 'idle';
-    state.workStartAt = null;
-    state.segmentStartAt = null;
-    state.consecStartAt = null;
-    state.accumulatedWorkSec = 0;
-    state.consecAccumSec = 0;
-    state.remindedShown = false;
-    state.dueShown = false;
-    document.getElementById('bannerReminder').classList.remove('show');
-    document.getElementById('bannerDue').classList.remove('show');
-    await save();
-    render();
-  }
 
-  async function openBreakPicker(){
-    document.getElementById('breakPicker').style.display = 'block';
-  }
+    if (state.history.length > 30) {
 
-  async function startBreak(mins){
-    if(state.shiftStatus === 'working' && state.segmentStartAt){
-      const now = Date.now();
-      state.accumulatedWorkSec += (now - state.segmentStartAt)/1000;
-      state.weekSeconds += (now - state.segmentStartAt)/1000;
-      state.consecAccumSec += (now - state.segmentStartAt)/1000;
-      state.segmentStartAt = null;
+        state.history =
+            state.history.slice(0, 30);
+
     }
-    state.shiftStatus = 'break';
-    state.breakStatus = {mins, startAt: Date.now()};
-    document.getElementById('breakPicker').style.display = 'none';
-    await save();
-    render();
-  }
 
-  async function endBreak(auto){
-    if(!state.breakStatus) return;
-    const elapsedSec = (Date.now() - state.breakStatus.startAt)/1000;
-    state.breakTotalTodaySec += elapsedSec;
-    state.breakStatus = null;
-    state.shiftStatus = 'working';
-    state.segmentStartAt = Date.now();
-    // a qualifying break resets consecutive working time
-    state.consecAccumSec = 0;
-    state.consecStartAt = Date.now();
-    state.remindedShown = false;
-    state.dueShown = false;
-    document.getElementById('bannerReminder').classList.remove('show');
-    document.getElementById('bannerDue').classList.remove('show');
-    document.getElementById('bannerOk').classList.add('show');
-    setTimeout(()=>document.getElementById('bannerOk').classList.remove('show'), 4000);
-    await save();
-    render();
-  }
+    state.shiftActive = false;
+    state.breakActive = false;
+    state.shiftStart = null;
+    state.workPeriodStart = null;
+    state.breakStart = null;
+    state.totalWorkedBeforeCurrentPeriod = 0;
 
-  async function clearHistory(){
+    saveState();
+
+    updateUI();
+}
+
+
+/* =========================================================
+   BREAK
+========================================================= */
+
+function startBreak() {
+
+    if (!state.shiftActive) return;
+
+    if (state.breakActive) return;
+
+    state.breakActive = true;
+
+    state.breakStart = getNow();
+
+    saveState();
+
+    updateUI();
+}
+
+
+function endBreak() {
+
+    if (!state.breakActive) return;
+
+    const now = getNow();
+
+    const breakSeconds =
+        Math.floor(
+            (now - state.breakStart) / 1000
+        );
+
+    if (breakSeconds < MIN_BREAK) {
+
+        alert(
+            "The break has not reached 15 minutes yet."
+        );
+
+        return;
+    }
+
+    state.breakActive = false;
+
+    state.breakStart = null;
+
+    /*
+       Qualifying break:
+       The previous working period is complete.
+       Start a fresh 6-hour working period.
+    */
+
+    state.workPeriodStart = now;
+
+    saveState();
+
+    updateUI();
+}
+
+
+/* =========================================================
+   CURRENT WORK TIMER
+========================================================= */
+
+function getCurrentWorkSeconds() {
+
+    if (!state.shiftActive) {
+
+        return 0;
+
+    }
+
+    if (state.breakActive) {
+
+        return 0;
+
+    }
+
+    return Math.max(
+        0,
+        Math.floor(
+            (getNow() - state.workPeriodStart) / 1000
+        )
+    );
+
+}
+
+
+function getRemainingWorkSeconds() {
+
+    return Math.max(
+        0,
+        WORK_LIMIT -
+        getCurrentWorkSeconds()
+    );
+
+}
+
+
+/* =========================================================
+   BREAK TIMER
+========================================================= */
+
+function getBreakSeconds() {
+
+    if (!state.breakActive ||
+        !state.breakStart) {
+
+        return 0;
+
+    }
+
+    return Math.max(
+        0,
+        Math.floor(
+            (getNow() - state.breakStart) / 1000
+        )
+    );
+
+}
+
+
+/* =========================================================
+   DAILY WORK
+========================================================= */
+
+function getTodayWorkedSeconds() {
+
+    let total = 0;
+
+    const today =
+        new Date().toLocaleDateString("en-GB");
+
+    state.history.forEach(item => {
+
+        if (item.date === today) {
+
+            total += item.worked;
+
+        }
+
+    });
+
+    if (state.shiftActive &&
+        !state.breakActive) {
+
+        total +=
+            getCurrentWorkSeconds();
+
+    }
+
+    return total;
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function updateUI() {
+
+    const mainTimer =
+        document.getElementById("mainTimer");
+
+    const mainStatus =
+        document.getElementById("mainStatus");
+
+    const progressBar =
+        document.getElementById("progressBar");
+
+    const startButton =
+        document.getElementById("startButton");
+
+    const breakButton =
+        document.getElementById("breakButton");
+
+    const stopButton =
+        document.getElementById("stopButton");
+
+    const breakCard =
+        document.getElementById("breakCard");
+
+    const statusDot =
+        document.getElementById("statusDot");
+
+    const shiftStart =
+        document.getElementById("shiftStart");
+
+    const dailyHours =
+        document.getElementById("dailyHours");
+
+    const notice =
+        document.getElementById("notice");
+
+
+    /* ---------------------------------------------
+       NOT STARTED
+    --------------------------------------------- */
+
+    if (!state.shiftActive) {
+
+        mainTimer.textContent =
+            "06:00:00";
+
+        mainTimer.className =
+            "main-timer timer-green";
+
+        mainStatus.textContent =
+            "READY TO START";
+
+        mainStatus.className =
+            "status safe";
+
+        progressBar.style.width =
+            "0%";
+
+        startButton.style.display =
+            "block";
+
+        breakButton.style.display =
+            "none";
+
+        stopButton.style.display =
+            "none";
+
+        breakCard.classList.remove(
+            "visible"
+        );
+
+        statusDot.classList.remove(
+            "active"
+        );
+
+        shiftStart.textContent =
+            "--:--";
+
+        dailyHours.textContent =
+            formatShortTime(
+                getTodayWorkedSeconds()
+            );
+
+        notice.classList.remove(
+            "visible"
+        );
+
+        renderHistory();
+
+        return;
+    }
+
+
+    statusDot.classList.add(
+        "active"
+    );
+
+    startButton.style.display =
+        "none";
+
+    stopButton.style.display =
+        "block";
+
+    shiftStart.textContent =
+        new Date(
+            state.shiftStart
+        ).toLocaleTimeString(
+            "en-GB",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    /* ---------------------------------------------
+       BREAK ACTIVE
+    --------------------------------------------- */
+
+    if (state.breakActive) {
+
+        const breakSeconds =
+            getBreakSeconds();
+
+        const breakTimer =
+            document.getElementById(
+                "breakTimer"
+            );
+
+        const breakMessage =
+            document.getElementById(
+                "breakMessage"
+            );
+
+        const breakProgress =
+            document.getElementById(
+                "breakProgressBar"
+            );
+
+        const endBreakButton =
+            document.getElementById(
+                "endBreakButton"
+            );
+
+        breakCard.classList.add(
+            "visible"
+        );
+
+        breakTimer.textContent =
+            formatTime(breakSeconds)
+            .substring(3);
+
+        const percent =
+            Math.min(
+                100,
+                (breakSeconds / MIN_BREAK) * 100
+            );
+
+        breakProgress.style.width =
+            percent + "%";
+
+        if (breakSeconds >= MIN_BREAK) {
+
+            breakMessage.textContent =
+                "15-minute qualifying break reached.";
+
+            endBreakButton.disabled =
+                false;
+
+        } else {
+
+            const remaining =
+                MIN_BREAK -
+                breakSeconds;
+
+            breakMessage.textContent =
+                "Qualifying break in " +
+                formatTime(remaining);
+
+            endBreakButton.disabled =
+                true;
+
+        }
+
+        mainTimer.textContent =
+            "ON BREAK";
+
+        mainTimer.className =
+            "main-timer timer-green";
+
+        mainStatus.textContent =
+            "BREAK IN PROGRESS";
+
+        mainStatus.className =
+            "status safe";
+
+        progressBar.style.width =
+            "0%";
+
+        breakButton.style.display =
+            "none";
+
+        notice.classList.remove(
+            "visible"
+        );
+
+        dailyHours.textContent =
+            formatShortTime(
+                getTodayWorkedSeconds()
+            );
+
+        return;
+    }
+
+
+    /* ---------------------------------------------
+       WORKING
+    --------------------------------------------- */
+
+    breakCard.classList.remove(
+        "visible"
+    );
+
+    breakButton.style.display =
+        "block";
+
+    const remaining =
+        getRemainingWorkSeconds();
+
+    const worked =
+        getCurrentWorkSeconds();
+
+    mainTimer.textContent =
+        formatTime(remaining);
+
+    const percent =
+        Math.min(
+            100,
+            (worked / WORK_LIMIT) * 100
+        );
+
+    progressBar.style.width =
+        percent + "%";
+
+
+    /* ---------------------------------------------
+       STATUS
+    --------------------------------------------- */
+
+    notice.classList.remove(
+        "visible",
+        "warning",
+        "danger"
+    );
+
+    if (remaining <= 0) {
+
+        mainTimer.className =
+            "main-timer timer-red";
+
+        mainStatus.textContent =
+            "BREAK REQUIRED NOW";
+
+        mainStatus.className =
+            "status danger";
+
+        notice.textContent =
+            "⚠️ 6 HOURS REACHED — TAKE YOUR REQUIRED BREAK";
+
+        notice.classList.add(
+            "visible",
+            "danger"
+        );
+
+    } else if (remaining <= WARNING_TIME) {
+
+        mainTimer.className =
+            "main-timer timer-orange";
+
+        mainStatus.textContent =
+            "BREAK DUE SOON";
+
+        mainStatus.className =
+            "status warning";
+
+        notice.textContent =
+            "⚠️ Your 6-hour working period is nearly complete.";
+
+        notice.classList.add(
+            "visible",
+            "warning"
+        );
+
+    } else {
+
+        mainTimer.className =
+            "main-timer timer-green";
+
+        mainStatus.textContent =
+            "SAFE — BREAK NOT YET REQUIRED";
+
+        mainStatus.className =
+            "status safe";
+    }
+
+
+    dailyHours.textContent =
+        formatShortTime(
+            getTodayWorkedSeconds()
+        );
+
+    renderHistory();
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function renderHistory() {
+
+    const history =
+        document.getElementById(
+            "history"
+        );
+
+    if (!state.history ||
+        state.history.length === 0) {
+
+        history.innerHTML =
+            '<div class="history-empty">' +
+            'No completed shifts yet.' +
+            '</div>';
+
+        return;
+    }
+
+    history.innerHTML =
+        state.history.map(item => {
+
+            return `
+                <div class="history-item">
+
+                    <div>
+                        <div class="history-date">
+                            ${item.date}
+                        </div>
+
+                        <div style="font-size:12px;color:#71849a;">
+                            Started ${item.start}
+                        </div>
+                    </div>
+
+                    <div class="history-hours">
+                        ${formatShortTime(item.worked)}
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+}
+
+
+function clearHistory() {
+
+    if (!confirm(
+        "Delete all shift history?"
+    )) {
+
+        return;
+    }
+
     state.history = [];
-    await save();
-    render();
-  }
 
-  async function enableNotifications(){
-    if(!('Notification' in window)){
-      document.getElementById('notifStat').textContent = 'Notifications not supported in this browser.';
-      return;
+    saveState();
+
+    renderHistory();
+
+    updateUI();
+}
+
+
+/* =========================================================
+   STARTUP
+========================================================= */
+
+loadState();
+
+updateUI();
+
+
+/* =========================================================
+   KEEP TIMER ALIVE
+========================================================= */
+
+setInterval(
+    updateUI,
+    1000
+);
+
+
+/* =========================================================
+   VISIBILITY CHANGE
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    function() {
+
+        /*
+           We use real timestamps rather than
+           counting JavaScript intervals.
+
+           Therefore the timer remains accurate
+           even when the phone puts the page to sleep.
+        */
+
+        if (!document.hidden) {
+
+            updateUI();
+
+        }
+
     }
-    const perm = await Notification.requestPermission();
-    state.notifsEnabled = (perm === 'granted');
-    await save();
-    render();
-  }
+);
 
-  // ---- Render ----
-  function render(){
-    const chip = document.getElementById('statusChip');
-    if(state.shiftStatus === 'idle'){ chip.textContent='SHIFT NOT STARTED'; chip.className='status-chip'; }
-    else if(state.shiftStatus === 'working'){ chip.textContent='WORKING'; chip.className='status-chip working'; }
-    else { chip.textContent='ON BREAK'; chip.className='status-chip break'; }
 
-    document.getElementById('startBtn').disabled = state.shiftStatus !== 'idle';
-    document.getElementById('endBtn').disabled = state.shiftStatus === 'idle';
-    document.getElementById('breakRow').style.display = state.shiftStatus === 'working' ? 'flex' : 'none';
-    if(state.shiftStatus !== 'working'){
-      document.getElementById('breakPicker').style.display = 'none';
+/* =========================================================
+   PREVENT ACCIDENTAL SCREEN SLEEP WHERE SUPPORTED
+========================================================= */
+
+let wakeLock = null;
+
+async function requestWakeLock() {
+
+    try {
+
+        if (
+            "wakeLock" in navigator &&
+            !wakeLock
+        ) {
+
+            wakeLock =
+                await navigator.wakeLock.request(
+                    "screen"
+                );
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Wake Lock unavailable"
+        );
+
     }
-    document.getElementById('breakActive').style.display = state.shiftStatus === 'break' ? 'block' : 'none';
+}
 
-    document.getElementById('workingTime').textContent = fmtHMS(currentWorkingSec());
-    document.getElementById('consecTime').textContent = fmtHMS(currentConsecSec());
-    document.getElementById('consecReadout').classList.toggle('alert', currentConsecSec() >= SIX_HOURS);
 
-    document.getElementById('todayStart').textContent = fmtClock(state.todayStart);
-    document.getElementById('todayEnd').textContent = fmtClock(state.todayEnd);
-    document.getElementById('todayBreaks').textContent = Math.round(state.breakTotalTodaySec/60) + ' min';
+document.addEventListener(
+    "visibilitychange",
+    async function() {
 
-    const weekSec = currentWeekSec();
-    document.getElementById('weekTotal').textContent = fmtHM(weekSec);
-    const pct = Math.min(100, (weekSec/WEEK_MAX)*100);
-    const fill = document.getElementById('weekBarFill');
-    fill.style.width = pct+'%';
-    fill.className = 'week-bar-fill' + (weekSec>=WEEK_MAX ? ' over' : (weekSec>=WEEK_WARN ? ' warn' : ''));
-    document.getElementById('weekWarn').classList.toggle('show', weekSec>=WEEK_WARN && weekSec<WEEK_MAX);
-    document.getElementById('weekOver').classList.toggle('show', weekSec>=WEEK_MAX);
+        if (
+            !document.hidden &&
+            state.shiftActive
+        ) {
 
-    const histEl = document.getElementById('shiftHistory');
-    if(state.history.length === 0){
-      histEl.innerHTML = '<div class="empty">No completed shifts yet.</div>';
-    } else {
-      histEl.innerHTML = state.history.map(s=>{
-        return '<div class="shift-row"><span class="d">'+s.date+' &middot; '+s.start+'&ndash;'+s.end+'</span><span>'+fmtHM(s.durationSec)+' &middot; '+s.breakMin+'m break</span></div>';
-      }).join('');
+            await requestWakeLock();
+
+        }
+
+    }
+);
+
+
+/* Request wake lock when shift starts */
+
+const originalStartShift =
+    startShift;
+
+startShift = function() {
+
+    originalStartShift();
+
+    requestWakeLock();
+
+};
+
+
+/* Release wake lock when shift ends */
+
+const originalStopShift =
+    stopShift;
+
+stopShift = function() {
+
+    originalStopShift();
+
+    if (wakeLock) {
+
+        wakeLock.release()
+            .catch(() => {});
+
+        wakeLock = null;
+
     }
 
-    const notifStat = document.getElementById('notifStat');
-    const notifBtn = document.getElementById('enableNotifBtn');
-    if(state.notifsEnabled){
-      notifStat.textContent = 'Notifications enabled.';
-      notifStat.classList.add('on');
-      notifBtn.style.display = 'none';
-    } else {
-      notifStat.textContent = 'Notifications not enabled.';
-      notifStat.classList.remove('on');
-      notifBtn.style.display = 'inline-block';
-      notifBtn.textContent = 'Enable';
-    }
-
-    if(state.shiftStatus === 'break' && state.breakStatus){
-      const targetSec = state.breakStatus.mins*60;
-      const elapsed = (Date.now() - state.breakStatus.startAt)/1000;
-      const remaining = Math.max(0, targetSec - elapsed);
-      document.getElementById('breakRemaining').textContent = fmtMS(remaining);
-      if(remaining <= 0){
-        endBreak(true);
-      }
-    }
-
-    const consec = currentConsecSec();
-    if(!state.remindedShown && consec >= REMINDER_AT && consec < SIX_HOURS){
-      state.remindedShown = true;
-      document.getElementById('bannerReminder').classList.add('show');
-      notify('WTD Break Reminder', '30 minutes until 6 hours of consecutive working time.');
-      save();
-    }
-    if(!state.dueShown && consec >= SIX_HOURS){
-      state.dueShown = true;
-      document.getElementById('bannerDue').classList.add('show');
-      notify('WTD Break Due', "You've reached 6 hours of consecutive working time.");
-      save();
-    }
-    if(!state.weekWarnShown && weekSec >= WEEK_WARN && weekSec < WEEK_MAX){
-      state.weekWarnShown = true;
-      notify('Weekly Hours Warning', 'You are approaching 60 hours this week.');
-      save();
-    }
-    if(!state.weekOverShown && weekSec >= WEEK_MAX){
-      state.weekOverShown = true;
-      notify('Weekly Hours Exceeded', "You've reached or exceeded 60 hours this week.");
-      save();
-    }
-  }
-
-  // ---- Wire up events ----
-  document.getElementById('startBtn').addEventListener('click', startWork);
-  document.getElementById('endBtn').addEventListener('click', endWork);
-  document.getElementById('takeBreakBtn').addEventListener('click', openBreakPicker);
-  document.getElementById('endBreakBtn').addEventListener('click', ()=>endBreak(false));
-  document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
-  document.getElementById('enableNotifBtn').addEventListener('click', enableNotifications);
-  document.querySelectorAll('.break-opts button').forEach(btn=>{
-    btn.addEventListener('click', ()=>startBreak(parseInt(btn.dataset.mins,10)));
-  });
-
-  window.addEventListener('beforeunload', ()=>{ save(); });
-
-  load();
-  setInterval(render, 1000);
-})();
+};
 </script>
+
 </body>
 </html>
