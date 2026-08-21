@@ -11,6 +11,7 @@
 
 <meta name="theme-color" content="#07111f">
 
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HGV WTD">
@@ -360,6 +361,53 @@ button:active {
     display: block;
 }
 
+/* BREAK ALERT */
+.break-alert {
+    display: none;
+    border-radius: 15px;
+    padding: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 16px;
+    background: rgba(239,68,68,.18);
+    border: 2px solid #f87171;
+    color: #fca5a5;
+    animation: alertFlash 1s infinite;
+}
+
+.break-alert.visible {
+    display: block;
+}
+
+.field-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #9db0c3;
+    line-height: 1.45;
+}
+
+.driving-card {
+    margin-top: 15px;
+}
+
+.driving-buttons {
+    display: grid;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#drivingBreakMessage {
+    margin-top: 12px;
+}
+
+
+@keyframes alertFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .35; }
+}
+
+
 /* HISTORY */
 
 .history-title {
@@ -442,6 +490,10 @@ button:active {
 
     </div>
 
+    <div id="breakAlert" class="break-alert">
+        🔔 BREAK ALERT — 30 MINUTES LEFT
+    </div>
+
 
     <!-- SETUP -->
 
@@ -468,40 +520,29 @@ button:active {
         <div class="field">
 
             <label for="workPeriod">
-                Working Period
+                Estimated Shift Length Today
             </label>
 
             <select id="workPeriod">
 
-                <option value="240">
-                    4 hours
+                <option value="360" data-break="0">
+                    Up to 6 hours — No specific work break
                 </option>
 
-                <option value="270">
-                    4 hours 30 minutes
+                <option value="540" data-break="30" selected>
+                    6 to 9 hours — 30 minutes total break
                 </option>
 
-                <option value="300">
-                    5 hours
-                </option>
-
-                <option value="330">
-                    5 hours 30 minutes
-                </option>
-
-                <option value="360" selected>
-                    6 hours
-                </option>
-
-                <option value="390">
-                    6 hours 30 minutes
-                </option>
-
-                <option value="420">
-                    7 hours
+                <option value="600" data-break="45">
+                    Over 9 hours — 45 minutes total break
                 </option>
 
             </select>
+
+            <div id="breakRequirementHint"
+                 class="field-hint">
+                Work break requirement: <strong>30 minutes</strong>
+            </div>
 
         </div>
 
@@ -591,6 +632,66 @@ button:active {
     </div>
 
 
+    <!-- DRIVING TIME -->
+
+    <div id="drivingCard" class="card driving-card">
+
+        <div class="label">
+            DRIVING TIME
+        </div>
+
+        <div id="drivingTimer"
+             class="main-timer timer-green">
+            04:30:00
+        </div>
+
+        <div id="drivingStatus"
+             class="status safe">
+            READY — START DRIVING WHEN YOU ACTUALLY BEGIN DRIVING
+        </div>
+
+        <div class="progress">
+            <div id="drivingProgressBar"
+                 class="progress-bar">
+            </div>
+        </div>
+
+        <div class="driving-buttons">
+
+            <button
+                id="startDrivingButton"
+                class="btn-start"
+                onclick="startDriving()">
+                START DRIVING
+            </button>
+
+            <button
+                id="startDrivingBreakButton"
+                class="btn-break"
+                onclick="startDrivingBreak()"
+                style="display:none;">
+                START DRIVING BREAK
+            </button>
+
+            <button
+                id="endDrivingBreakButton"
+                class="btn-end-break"
+                onclick="endDrivingBreak()"
+                disabled
+                style="display:none;">
+                END DRIVING BREAK
+            </button>
+
+        </div>
+
+        <div id="drivingBreakMessage"
+             class="break-message">
+            A 45-minute driving break is required before exceeding 4 hours 30 minutes of driving.
+        </div>
+
+    </div>
+
+
     <!-- BREAK -->
 
     <div id="breakCard"
@@ -612,7 +713,7 @@ button:active {
         <div id="breakMessage"
              class="break-message">
 
-            Minimum qualifying break: 15 minutes
+            Minimum qualifying work break: 30 minutes
 
         </div>
 
@@ -763,7 +864,11 @@ button:active {
    SETTINGS
 ========================================================= */
 
-const MIN_BREAK = 15 * 60;
+const MIN_BREAK = 30 * 60;
+
+const DRIVING_LIMIT = 4 * 60 * 60 + 30 * 60;
+const DRIVING_WARNING = 30 * 60;
+const DRIVING_BREAK = 45 * 60;
 
 const WARNING_TIME = 30 * 60;
 
@@ -791,6 +896,12 @@ let state = {
 
     totalWorkedBeforeCurrentPeriod: 0,
 
+    drivingActive: false,
+    drivingBreakActive: false,
+    drivingStart: null,
+    drivingBreakStart: null,
+    totalDrivingBeforeBreak: 0,
+
     history: []
 
 };
@@ -815,6 +926,49 @@ const workPeriodSelect =
     document.getElementById(
         "workPeriod"
     );
+
+const breakRequirementHint =
+    document.getElementById(
+        "breakRequirementHint"
+    );
+
+const drivingTimer =
+    document.getElementById(
+        "drivingTimer"
+    );
+
+const drivingStatus =
+    document.getElementById(
+        "drivingStatus"
+    );
+
+const drivingProgressBar =
+    document.getElementById(
+        "drivingProgressBar"
+    );
+
+const startDrivingButton =
+    document.getElementById(
+        "startDrivingButton"
+    );
+
+const startDrivingBreakButton =
+    document.getElementById(
+        "startDrivingBreakButton"
+    );
+
+const endDrivingBreakButton =
+    document.getElementById(
+        "endDrivingBreakButton"
+    );
+
+const drivingBreakMessage =
+    document.getElementById(
+        "drivingBreakMessage"
+    );
+
+let notifiedDrivingWarning = false;
+let notifiedDrivingDanger = false;
 
 
 /* =========================================================
@@ -1293,9 +1447,52 @@ function startShiftNow() {
 }
 
 
+function getShiftBreakMinutes() {
+    const option =
+        workPeriodSelect.options[
+            workPeriodSelect.selectedIndex
+        ];
+
+    return Number(
+        option.getAttribute("data-break") || 0
+    );
+}
+
+function getShiftBreakText() {
+    const minutes = getShiftBreakMinutes();
+
+    if (minutes === 0) {
+        return "No specific work break";
+    }
+
+    return minutes + " minutes total break";
+}
+
+function updateBreakRequirementHint() {
+    if (!breakRequirementHint) return;
+
+    const minutes = getShiftBreakMinutes();
+
+    if (minutes === 0) {
+        breakRequirementHint.innerHTML =
+            "Work break requirement: <strong>No specific break for WTD shift length</strong>. Driving rules may still require a break.";
+    } else {
+        breakRequirementHint.innerHTML =
+            "Work break requirement: <strong>" +
+            minutes +
+            " minutes total</strong> for today's estimated shift.";
+    }
+}
+
+function getRequiredWorkBreakSeconds() {
+    return getShiftBreakMinutes() * 60;
+}
+
+
 /* =========================================================
    START SHIFT
 ========================================================= */
+
 
 function startShift(timestamp) {
 
@@ -1344,8 +1541,17 @@ function startShift(timestamp) {
     state.totalWorkedBeforeCurrentPeriod =
         0;
 
+    state.drivingActive = false;
+    state.drivingBreakActive = false;
+    state.drivingStart = null;
+    state.drivingBreakStart = null;
+    state.totalDrivingBeforeBreak = 0;
+
     notifiedWarning =
         false;
+
+    notifiedDrivingWarning = false;
+    notifiedDrivingDanger = false;
 
     notifiedDanger =
         false;
@@ -1455,8 +1661,17 @@ function stopShift() {
     state.totalWorkedBeforeCurrentPeriod =
         0;
 
+    state.drivingActive = false;
+    state.drivingBreakActive = false;
+    state.drivingStart = null;
+    state.drivingBreakStart = null;
+    state.totalDrivingBeforeBreak = 0;
+
     notifiedWarning =
         false;
+
+    notifiedDrivingWarning = false;
+    notifiedDrivingDanger = false;
 
     notifiedDanger =
         false;
@@ -1470,8 +1685,111 @@ function stopShift() {
 
 
 /* =========================================================
+   DRIVING TIME — 4 HOURS 30 MINUTES
+========================================================= */
+
+function getDrivingSeconds() {
+
+    if (!state.drivingActive || state.drivingBreakActive) {
+        return state.totalDrivingBeforeBreak || 0;
+    }
+
+    return (
+        state.totalDrivingBeforeBreak +
+        Math.max(
+            0,
+            Math.floor(
+                (Date.now() - state.drivingStart) / 1000
+            )
+        )
+    );
+}
+
+function startDriving() {
+
+    if (!state.shiftActive || state.drivingActive) {
+        return;
+    }
+
+    state.drivingActive = true;
+    state.drivingBreakActive = false;
+    state.drivingStart = Date.now();
+
+    notifiedDrivingWarning = false;
+    notifiedDrivingDanger = false;
+
+    saveState();
+    updateUI();
+}
+
+function startDrivingBreak() {
+
+    if (!state.drivingActive) {
+        return;
+    }
+
+    state.totalDrivingBeforeBreak =
+        getDrivingSeconds();
+
+    state.drivingActive = false;
+    state.drivingBreakActive = true;
+    state.drivingBreakStart = Date.now();
+
+    saveState();
+    updateUI();
+}
+
+function getDrivingBreakSeconds() {
+
+    if (!state.drivingBreakActive ||
+        !state.drivingBreakStart) {
+        return 0;
+    }
+
+    return Math.max(
+        0,
+        Math.floor(
+            (Date.now() - state.drivingBreakStart) / 1000
+        )
+    );
+}
+
+function endDrivingBreak() {
+
+    if (!state.drivingBreakActive) {
+        return;
+    }
+
+    const seconds =
+        getDrivingBreakSeconds();
+
+    if (seconds < DRIVING_BREAK) {
+
+        alert(
+            "The driving break must reach 45 minutes."
+        );
+
+        return;
+    }
+
+    state.totalDrivingBeforeBreak = 0;
+    state.drivingBreakActive = false;
+    state.drivingBreakStart = null;
+    state.drivingActive = true;
+    state.drivingStart = Date.now();
+
+    notifiedDrivingWarning = false;
+    notifiedDrivingDanger = false;
+
+    saveState();
+    updateUI();
+}
+
+
+/* =========================================================
    WORK TIME
 ========================================================= */
+
 
 function getCurrentWorkSeconds() {
 
@@ -1514,6 +1832,10 @@ function getRemainingSeconds() {
 ========================================================= */
 
 function startBreak() {
+
+    if (breakAlert) {
+        breakAlert.classList.remove("visible");
+    }
 
     if (
         !state.shiftActive ||
@@ -1570,13 +1892,19 @@ function endBreak() {
         );
 
 
+    const requiredBreak =
+        getRequiredWorkBreakSeconds();
+
     if (
+        requiredBreak > 0 &&
         breakSeconds <
-        MIN_BREAK
+        requiredBreak
     ) {
 
         alert(
-            "The break has not reached 15 minutes yet."
+            "The required work break for today's estimated shift is " +
+            getShiftBreakMinutes() +
+            " minutes."
         );
 
         return;
@@ -1734,9 +2062,160 @@ function getTodayWorkedSeconds() {
 }
 
 
+function updateDrivingUI() {
+
+    if (!drivingTimer) return;
+
+    const seconds =
+        getDrivingSeconds();
+
+    if (state.drivingBreakActive) {
+
+        const breakSeconds =
+            getDrivingBreakSeconds();
+
+        drivingTimer.textContent =
+            "BREAK " +
+            formatTime(
+                breakSeconds
+            );
+
+        drivingStatus.textContent =
+            breakSeconds >= DRIVING_BREAK
+                ? "45-MINUTE DRIVING BREAK COMPLETE"
+                : "DRIVING BREAK — " +
+                  formatTime(
+                      DRIVING_BREAK - breakSeconds
+                  ) +
+                  " remaining";
+
+        drivingStatus.className =
+            "status safe";
+
+        drivingProgressBar.style.width =
+            Math.min(
+                100,
+                (breakSeconds / DRIVING_BREAK) * 100
+            ) + "%";
+
+        startDrivingButton.style.display =
+            "none";
+
+        startDrivingBreakButton.style.display =
+            "none";
+
+        endDrivingBreakButton.style.display =
+            "block";
+
+        endDrivingBreakButton.disabled =
+            breakSeconds < DRIVING_BREAK;
+
+        return;
+    }
+
+    const remaining =
+        Math.max(
+            0,
+            DRIVING_LIMIT - seconds
+        );
+
+    drivingTimer.textContent =
+        formatTime(
+            remaining
+        );
+
+    drivingProgressBar.style.width =
+        Math.min(
+            100,
+            (seconds / DRIVING_LIMIT) * 100
+        ) + "%";
+
+    startDrivingButton.style.display =
+        state.drivingActive
+            ? "none"
+            : "block";
+
+    startDrivingBreakButton.style.display =
+        state.drivingActive
+            ? "block"
+            : "none";
+
+    endDrivingBreakButton.style.display =
+        "none";
+
+    if (!state.drivingActive) {
+
+        drivingStatus.textContent =
+            "READY — START DRIVING WHEN YOU ACTUALLY BEGIN DRIVING";
+
+        drivingStatus.className =
+            "status safe";
+
+        return;
+    }
+
+    if (remaining <= 0) {
+
+        drivingStatus.textContent =
+            "DRIVING LIMIT REACHED — TAKE A 45-MINUTE BREAK";
+
+        drivingStatus.className =
+            "status danger";
+
+        drivingTimer.className =
+            "main-timer timer-red";
+
+        if (!notifiedDrivingDanger) {
+
+            sendNotification(
+                "DRIVING BREAK REQUIRED",
+                "You have reached 4 hours 30 minutes of driving. Take a 45-minute break before continuing."
+            );
+
+            playBeep(3);
+            notifiedDrivingDanger = true;
+        }
+
+    } else if (remaining <= DRIVING_WARNING) {
+
+        drivingStatus.textContent =
+            "DRIVING BREAK DUE SOON — 30 MINUTES LEFT";
+
+        drivingStatus.className =
+            "status warning";
+
+        drivingTimer.className =
+            "main-timer timer-orange";
+
+        if (!notifiedDrivingWarning) {
+
+            sendNotification(
+                "Driving break due soon",
+                "You have 30 minutes of driving left before the 4 hours 30 minutes limit."
+            );
+
+            playBeep(2);
+            notifiedDrivingWarning = true;
+        }
+
+    } else {
+
+        drivingStatus.textContent =
+            "DRIVING — 4 HOURS 30 MINUTES MAX";
+
+        drivingStatus.className =
+            "status safe";
+
+        drivingTimer.className =
+            "main-timer timer-green";
+    }
+}
+
+
 /* =========================================================
    UPDATE UI
 ========================================================= */
+
 
 function updateUI() {
 
@@ -1807,6 +2286,8 @@ function updateUI() {
 
 
     updateNotifyBanner();
+    updateBreakRequirementHint();
+    updateDrivingUI();
 
 
     selectedPeriod.textContent =
@@ -1957,7 +2438,10 @@ function updateUI() {
                 100,
                 (
                     breakSeconds /
-                    MIN_BREAK
+                    Math.max(
+                        1,
+                        getRequiredWorkBreakSeconds()
+                    )
                 ) * 100
             );
 
@@ -1966,13 +2450,28 @@ function updateUI() {
             percent + "%";
 
 
+        const requiredBreak =
+            getRequiredWorkBreakSeconds();
+
         if (
-            breakSeconds >=
-            MIN_BREAK
+            requiredBreak === 0
         ) {
 
             breakMessage.textContent =
-                "✓ 15-minute qualifying break reached.";
+                "No specific WTD work break is required for this shift length.";
+
+            endBreakButton.disabled =
+                false;
+
+        } else if (
+            breakSeconds >=
+            requiredBreak
+        ) {
+
+            breakMessage.textContent =
+                "✓ " +
+                getShiftBreakMinutes() +
+                "-minute qualifying work break reached.";
 
             endBreakButton.disabled =
                 false;
@@ -2122,7 +2621,7 @@ function updateUI() {
 
             sendNotification(
                 "Break due soon",
-                "30 minutes left before your working-period limit."
+                "30 minutes left — prepare to take your 30-minute break."
             );
 
             playBeep(1);
@@ -2275,6 +2774,8 @@ workPeriodSelect.addEventListener(
                     seconds
                 );
 
+            updateBreakRequirementHint();
+
         }
 
     }
@@ -2294,10 +2795,20 @@ if (
     state.shiftActive
 ) {
 
-    workPeriodSelect.value =
-        String(
-            state.workLimitSeconds / 60
-        );
+    const oldMinutes =
+        state.workLimitSeconds / 60;
+
+    if (oldMinutes <= 360) {
+        workPeriodSelect.value = "360";
+    } else if (oldMinutes <= 540) {
+        workPeriodSelect.value = "540";
+    } else {
+        workPeriodSelect.value = "600";
+    }
+
+} else {
+
+    workPeriodSelect.value = "540";
 
 }
 
