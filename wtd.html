@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-               maximum-scale=1.0, user-scalable=no">
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
 <meta name="theme-color" content="#07111f">
 
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HGV WTD">
@@ -18,341 +19,395 @@
 
 <style>
 
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-html,body{
-    margin:0;
-    padding:0;
-    min-height:100%;
-    background:#07111f;
-    color:#fff;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
-                Roboto,Arial,sans-serif;
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #07111f;
+    color: white;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 }
 
-body{
-    display:flex;
-    justify-content:center;
+body {
+    display: flex;
+    justify-content: center;
 }
 
-.app{
-    width:100%;
-    max-width:520px;
-    min-height:100vh;
-    padding:18px 16px 35px;
+.app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100vh;
+    padding: 18px 15px 40px;
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+/* HEADER */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
 }
 
-.logo{
-    font-size:20px;
-    font-weight:800;
-    letter-spacing:.5px;
+.logo {
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: .5px;
 }
 
-.logo span{
-    color:#4ade80;
+.logo span {
+    color: #4ade80;
 }
 
-.status-dot{
-    width:11px;
-    height:11px;
-    border-radius:50%;
-    background:#64748b;
-    box-shadow:0 0 12px rgba(100,116,139,.5);
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #64748b;
 }
 
-.status-dot.active{
-    background:#22c55e;
-    box-shadow:0 0 14px rgba(34,197,94,.8);
+.status-dot.active {
+    background: #22c55e;
+    box-shadow: 0 0 14px rgba(34,197,94,.8);
 }
 
-.card{
-    background:#0d1b2d;
-    border:1px solid #1d3048;
-    border-radius:22px;
-    padding:22px;
-    margin-bottom:15px;
-    box-shadow:0 12px 35px rgba(0,0,0,.18);
+/* CARDS */
+
+.card {
+    background: #0d1b2d;
+    border: 1px solid #1c3047;
+    border-radius: 22px;
+    padding: 20px;
+    margin-bottom: 15px;
 }
 
-.label{
-    color:#8fa4bb;
-    text-transform:uppercase;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:1px;
-    text-align:center;
+/* SETUP */
+
+.setup-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 15px;
 }
 
-.main-timer{
-    font-size:clamp(48px,14vw,78px);
-    font-weight:800;
-    text-align:center;
-    letter-spacing:-2px;
-    margin:8px 0 4px;
-    font-variant-numeric:tabular-nums;
+.field {
+    margin-bottom: 14px;
 }
 
-.timer-green{
-    color:#4ade80;
+.field label {
+    display: block;
+    color: #8fa4bb;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 7px;
 }
 
-.timer-orange{
-    color:#fbbf24;
+input,
+select {
+    width: 100%;
+    height: 53px;
+    border-radius: 14px;
+    border: 1px solid #29405a;
+    background: #091625;
+    color: white;
+    padding: 0 15px;
+    font-size: 18px;
+    font-weight: 700;
+    outline: none;
 }
 
-.timer-red{
-    color:#f87171;
+input:focus,
+select:focus {
+    border-color: #4ade80;
 }
 
-.status{
-    text-align:center;
-    font-weight:800;
-    font-size:15px;
-    margin-top:6px;
+/* TIMER */
+
+.label {
+    color: #8fa4bb;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
 }
 
-.status.safe{
-    color:#4ade80;
+.main-timer {
+    font-size: clamp(48px, 14vw, 78px);
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: -2px;
+    margin: 8px 0 4px;
+    font-variant-numeric: tabular-nums;
 }
 
-.status.warning{
-    color:#fbbf24;
+.timer-green {
+    color: #4ade80;
 }
 
-.status.danger{
-    color:#f87171;
+.timer-orange {
+    color: #fbbf24;
 }
 
-.progress{
-    height:10px;
-    background:#17283d;
-    border-radius:20px;
-    overflow:hidden;
-    margin-top:20px;
+.timer-red {
+    color: #f87171;
 }
 
-.progress-bar{
-    height:100%;
-    width:0%;
-    background:#22c55e;
-    transition:width .5s linear;
+.status {
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    margin-top: 6px;
 }
 
-.info-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
+.status.safe {
+    color: #4ade80;
 }
 
-.info-box{
-    background:#091625;
-    border-radius:16px;
-    padding:15px;
-    text-align:center;
+.status.warning {
+    color: #fbbf24;
 }
 
-.info-title{
-    font-size:11px;
-    color:#8195aa;
-    text-transform:uppercase;
-    letter-spacing:.7px;
-    margin-bottom:5px;
+.status.danger {
+    color: #f87171;
 }
 
-.info-value{
-    font-size:20px;
-    font-weight:800;
-    font-variant-numeric:tabular-nums;
+/* PROGRESS */
+
+.progress {
+    height: 10px;
+    background: #17283d;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 20px;
 }
 
-button{
-    width:100%;
-    border:none;
-    border-radius:17px;
-    padding:18px;
-    font-size:17px;
-    font-weight:800;
-    cursor:pointer;
-    margin-top:10px;
-    color:white;
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #22c55e;
+    transition: width .5s linear;
 }
 
-button:active{
-    transform:scale(.98);
+/* BUTTONS */
+
+button {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 17px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    color: white;
 }
 
-.btn-start{
-    background:#16a34a;
+button:active {
+    transform: scale(.98);
 }
 
-.btn-break{
-    background:#2563eb;
+.btn-start {
+    background: #16a34a;
 }
 
-.btn-stop{
-    background:#dc2626;
+.btn-now {
+    background: #2563eb;
 }
 
-.btn-end-break{
-    background:#16a34a;
+.btn-break {
+    background: #2563eb;
 }
 
-.btn-secondary{
-    background:#17283d;
-    color:#d7e2ee;
+.btn-stop {
+    background: #dc2626;
 }
 
-button:disabled{
-    opacity:.4;
-    cursor:not-allowed;
+.btn-end-break {
+    background: #16a34a;
 }
 
-.break-card{
-    display:none;
+.btn-secondary {
+    background: #17283d;
+    color: #d7e2ee;
 }
 
-.break-card.visible{
-    display:block;
+/* BREAK */
+
+.break-card {
+    display: none;
 }
 
-.break-timer{
-    font-size:55px;
-    text-align:center;
-    font-weight:800;
-    font-variant-numeric:tabular-nums;
-    margin:8px 0;
+.break-card.visible {
+    display: block;
 }
 
-.break-message{
-    text-align:center;
-    color:#a8b8ca;
-    font-size:14px;
-    margin-bottom:8px;
+.break-timer {
+    font-size: 55px;
+    text-align: center;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    margin: 8px 0;
 }
 
-.break-progress{
-    height:12px;
-    background:#17283d;
-    border-radius:20px;
-    overflow:hidden;
+.break-message {
+    text-align: center;
+    color: #a8b8ca;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-.break-progress-bar{
-    height:100%;
-    width:0%;
-    background:#3b82f6;
+.break-progress {
+    height: 12px;
+    background: #17283d;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
-.history-title{
-    font-size:16px;
-    font-weight:800;
-    margin-bottom:12px;
+.break-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
 }
 
-.history-empty{
-    color:#71849a;
-    text-align:center;
-    font-size:14px;
-    padding:12px 0;
+/* INFO */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
 
-.history-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:13px 0;
-    border-bottom:1px solid #1b2d43;
+.info-box {
+    background: #091625;
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
 }
 
-.history-item:last-child{
-    border-bottom:none;
+.info-title {
+    font-size: 11px;
+    color: #8195aa;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 5px;
 }
 
-.history-date{
-    font-size:13px;
-    color:#9db0c3;
+.info-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
 }
 
-.history-hours{
-    font-weight:800;
+/* NOTICE */
+
+.notice {
+    display: none;
+    border-radius: 15px;
+    padding: 14px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 14px;
 }
 
-.notice{
-    display:none;
-    border-radius:15px;
-    padding:14px;
-    margin-bottom:15px;
-    text-align:center;
-    font-weight:800;
-    font-size:14px;
+.notice.visible {
+    display: block;
 }
 
-.notice.visible{
-    display:block;
+.notice.warning {
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.35);
+    color: #fbbf24;
 }
 
-.notice.warning{
-    background:rgba(245,158,11,.12);
-    border:1px solid rgba(245,158,11,.35);
-    color:#fbbf24;
+.notice.danger {
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.35);
+    color: #f87171;
 }
 
-.notice.danger{
-    background:rgba(239,68,68,.12);
-    border:1px solid rgba(239,68,68,.35);
-    color:#f87171;
+/* NOTIFY BANNER */
+
+.notify-banner {
+    display: none;
+    border-radius: 15px;
+    padding: 12px 14px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    background: rgba(37,99,235,.12);
+    border: 1px solid rgba(37,99,235,.35);
+    color: #93c5fd;
+    cursor: pointer;
 }
 
-.sync-status{
-    text-align:center;
-    font-size:12px;
-    color:#8195aa;
-    margin-top:12px;
+.notify-banner.visible {
+    display: block;
 }
 
-.sync-status.ok{
-    color:#4ade80;
+/* HISTORY */
+
+.history-title {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
-.sync-status.error{
-    color:#f87171;
+.history-empty {
+    color: #71849a;
+    text-align: center;
+    font-size: 14px;
+    padding: 12px 0;
 }
 
-.sync-status.loading{
-    color:#fbbf24;
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid #1b2d43;
 }
 
-.footer{
-    text-align:center;
-    color:#52677d;
-    font-size:11px;
-    line-height:1.5;
-    margin-top:25px;
+.history-item:last-child {
+    border-bottom: none;
 }
 
-@media(max-width:360px){
+.history-date {
+    font-size: 13px;
+    color: #9db0c3;
+}
 
-    .app{
-        padding:14px 12px 25px;
-    }
+.history-hours {
+    font-weight: 800;
+}
 
-    .card{
-        padding:17px;
-    }
+/* FOOTER */
 
-    .main-timer{
-        font-size:48px;
-    }
+.footer {
+    text-align: center;
+    color: #52677d;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 25px;
+}
+
+.hidden {
+    display: none !important;
 }
 
 </style>
@@ -377,6 +432,100 @@ button:disabled{
     </div>
 
 
+    <!-- NOTIFICATION PERMISSION BANNER -->
+
+    <div id="notifyBanner"
+         class="notify-banner"
+         onclick="requestNotificationPermission()">
+
+        🔔 Tap to enable break alerts
+
+    </div>
+
+
+    <!-- SETUP -->
+
+    <div id="setupCard" class="card">
+
+        <div class="setup-title">
+            Start Shift
+        </div>
+
+        <div class="field">
+
+            <label for="startTime">
+                Start Time
+            </label>
+
+            <input
+                id="startTime"
+                type="time"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="workPeriod">
+                Working Period
+            </label>
+
+            <select id="workPeriod">
+
+                <option value="240">
+                    4 hours
+                </option>
+
+                <option value="270">
+                    4 hours 30 minutes
+                </option>
+
+                <option value="300">
+                    5 hours
+                </option>
+
+                <option value="330">
+                    5 hours 30 minutes
+                </option>
+
+                <option value="360" selected>
+                    6 hours
+                </option>
+
+                <option value="390">
+                    6 hours 30 minutes
+                </option>
+
+                <option value="420">
+                    7 hours
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="btn-start"
+            onclick="startShiftWithSelectedTime()">
+
+            START SHIFT
+
+        </button>
+
+
+        <button
+            class="btn-now"
+            onclick="startShiftNow()">
+
+            START NOW
+
+        </button>
+
+    </div>
+
+
     <!-- NOTICE -->
 
     <div id="notice"
@@ -389,18 +538,25 @@ button:disabled{
     <div class="card">
 
         <div class="label">
-            6-Hour Working Period
+            Time Until Break
         </div>
+
 
         <div id="mainTimer"
              class="main-timer timer-green">
+
             06:00:00
+
         </div>
+
 
         <div id="mainStatus"
              class="status safe">
+
             READY TO START
+
         </div>
+
 
         <div class="progress">
 
@@ -411,29 +567,22 @@ button:disabled{
         </div>
 
 
-        <button id="startButton"
-                class="btn-start"
-                onclick="startShift()">
-
-            START SHIFT
-
-        </button>
-
-
-        <button id="breakButton"
-                class="btn-break"
-                onclick="startBreak()"
-                style="display:none;">
+        <button
+            id="breakButton"
+            class="btn-break"
+            onclick="startBreak()"
+            style="display:none;">
 
             START BREAK
 
         </button>
 
 
-        <button id="stopButton"
-                class="btn-stop"
-                onclick="stopShift()"
-                style="display:none;">
+        <button
+            id="stopButton"
+            class="btn-stop"
+            onclick="stopShift()"
+            style="display:none;">
 
             END SHIFT
 
@@ -448,8 +597,9 @@ button:disabled{
          class="card break-card">
 
         <div class="label">
-            Break Timer
+            BREAK
         </div>
+
 
         <div id="breakTimer"
              class="break-timer">
@@ -458,13 +608,14 @@ button:disabled{
 
         </div>
 
+
         <div id="breakMessage"
              class="break-message">
 
-            Minimum qualifying break:
-            15 minutes
+            Minimum qualifying break: 15 minutes
 
         </div>
+
 
         <div class="break-progress">
 
@@ -475,10 +626,11 @@ button:disabled{
         </div>
 
 
-        <button id="endBreakButton"
-                class="btn-end-break"
-                onclick="endBreak()"
-                disabled>
+        <button
+            id="endBreakButton"
+            class="btn-end-break"
+            onclick="endBreak()"
+            disabled>
 
             END BREAK
 
@@ -487,7 +639,7 @@ button:disabled{
     </div>
 
 
-    <!-- INFORMATION -->
+    <!-- SHIFT INFORMATION -->
 
     <div class="card">
 
@@ -512,6 +664,29 @@ button:disabled{
             <div class="info-box">
 
                 <div class="info-title">
+                    Break Due
+                </div>
+
+                <div id="breakDue"
+                     class="info-value">
+
+                    --:--
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <br>
+
+
+        <div class="info-grid">
+
+            <div class="info-box">
+
+                <div class="info-title">
                     Working Today
                 </div>
 
@@ -524,15 +699,21 @@ button:disabled{
 
             </div>
 
-        </div>
 
+            <div class="info-box">
 
-        <!-- SUPABASE STATUS -->
+                <div class="info-title">
+                    Work Period
+                </div>
 
-        <div id="syncStatus"
-             class="sync-status loading">
+                <div id="selectedPeriod"
+                     class="info-value">
 
-            Connecting to Supabase...
+                    6:00
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -550,9 +731,9 @@ button:disabled{
         <div id="history">
         </div>
 
-
-        <button class="btn-secondary"
-                onclick="clearHistory()">
+        <button
+            class="btn-secondary"
+            onclick="clearHistory()">
 
             CLEAR HISTORY
 
@@ -561,15 +742,12 @@ button:disabled{
     </div>
 
 
-    <!-- FOOTER -->
-
     <div class="footer">
 
-        HGV Working Time Directive Timer
-        <br>
+        HGV Working Time Directive Timer<br>
 
-        Always follow the applicable UK WTD
-        rules and your employer's instructions.
+        Always follow the applicable UK WTD rules
+        and your employer's instructions.
 
     </div>
 
@@ -582,31 +760,15 @@ button:disabled{
 
 
 /* =========================================================
-   HGV WTD SETTINGS
+   SETTINGS
 ========================================================= */
 
-const WORK_LIMIT =
-    6 * 60 * 60;
+const MIN_BREAK = 15 * 60;
 
-const WARNING_TIME =
-    30 * 60;
-
-const MIN_BREAK =
-    15 * 60;
+const WARNING_TIME = 30 * 60;
 
 const STORAGE_KEY =
-    "hgv_wtd_timer_v1";
-
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-const SUPABASE_FUNCTION_URL =
-    "https://myyzbgsebrmsrrtsutyg.supabase.co/functions/v1/clever-responder";
-
-const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_J4Txrrk2JIyuWTF9bVZFyA_9o-UCWYb";
+    "hgv_wtd_timer_v2";
 
 
 /* =========================================================
@@ -615,157 +777,199 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 let state = {
 
-    shiftActive:false,
+    shiftActive: false,
 
-    breakActive:false,
+    breakActive: false,
 
-    shiftStart:null,
+    shiftStart: null,
 
-    workPeriodStart:null,
+    workPeriodStart: null,
 
-    breakStart:null,
+    breakStart: null,
 
-    totalWorkedBeforeCurrentPeriod:0,
+    workLimitSeconds: 6 * 60 * 60,
 
-    history:[]
+    totalWorkedBeforeCurrentPeriod: 0,
+
+    history: []
 
 };
 
+/* Flags so each notification only fires once per work period */
 
-/* =========================================================
-   SYNC STATUS
-========================================================= */
+let notifiedWarning = false;
 
-function setSyncStatus(
-    message,
-    type=""
-){
-
-    const element =
-        document.getElementById(
-            "syncStatus"
-        );
-
-    if(!element) return;
-
-    element.textContent =
-        message;
-
-    element.className =
-        "sync-status " + type;
-
-}
+let notifiedDanger = false;
 
 
 /* =========================================================
-   SUPABASE CONNECTION TEST
+   ELEMENTS
 ========================================================= */
 
-async function testSupabaseFunction(){
-
-    setSyncStatus(
-        "Connecting to Supabase...",
-        "loading"
+const startTimeInput =
+    document.getElementById(
+        "startTime"
     );
 
-    try{
-
-        const response =
-            await fetch(
-                SUPABASE_FUNCTION_URL,
-                {
-                    method:"POST",
-
-                    headers:{
-                        "Authorization":
-                            "Bearer " +
-                            SUPABASE_PUBLISHABLE_KEY,
-
-                        "apikey":
-                            SUPABASE_PUBLISHABLE_KEY,
-
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:JSON.stringify({
-                        name:"HGV"
-                    })
-                }
-            );
+const workPeriodSelect =
+    document.getElementById(
+        "workPeriod"
+    );
 
 
-        const text =
-            await response.text();
+/* =========================================================
+   SERVICE WORKER REGISTRATION
+========================================================= */
 
+if ("serviceWorker" in navigator) {
 
-        let data = null;
-
-
-        try{
-
-            data =
-                JSON.parse(text);
-
-        }catch{
-
-            data = null;
-
-        }
-
-
-        if(
-            response.ok &&
-            data &&
-            data.success === true
-        ){
-
-            setSyncStatus(
-                "✓ Supabase connected",
-                "ok"
-            );
+    navigator.serviceWorker
+        .register("/service-worker.js")
+        .catch(function (err) {
 
             console.log(
-                "SUPABASE CONNECTED:",
-                data
+                "Service worker registration failed:",
+                err
             );
 
-            return true;
+        });
+
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function updateNotifyBanner() {
+
+    const banner =
+        document.getElementById(
+            "notifyBanner"
+        );
+
+    if (
+        "Notification" in window &&
+        Notification.permission === "default"
+    ) {
+
+        banner.classList.add(
+            "visible"
+        );
+
+    } else {
+
+        banner.classList.remove(
+            "visible"
+        );
+
+    }
+
+}
+
+
+function requestNotificationPermission() {
+
+    if (!("Notification" in window)) {
+
+        return;
+
+    }
+
+    if (Notification.permission === "default") {
+
+        Notification.requestPermission().then(
+            function () {
+
+                updateNotifyBanner();
+
+            }
+        );
+
+    }
+
+}
+
+
+function sendNotification(title, body) {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
+    ) {
+
+        return;
+
+    }
+
+    const options = {
+
+        body: body,
+
+        icon: "/icons/icon-192.png",
+
+        badge: "/icons/icon-192.png",
+
+        tag: "wtd-reminder",
+
+        vibrate: [200, 100, 200]
+
+    };
+
+
+    if (
+        navigator.serviceWorker &&
+        navigator.serviceWorker.ready
+    ) {
+
+        navigator.serviceWorker.ready.then(
+            function (registration) {
+
+                registration.showNotification(
+                    title,
+                    options
+                );
+
+            }
+        ).catch(function () {
+
+            /* Fallback if the service worker isn't ready yet */
+
+            try {
+
+                new Notification(
+                    title,
+                    { body: body }
+                );
+
+            } catch (e) {
+
+                console.log(
+                    "Notification fallback failed:",
+                    e
+                );
+
+            }
+
+        });
+
+    } else {
+
+        try {
+
+            new Notification(
+                title,
+                { body: body }
+            );
+
+        } catch (e) {
+
+            console.log(
+                "Notification failed:",
+                e
+            );
 
         }
-
-
-        console.error(
-            "SUPABASE ERROR:",
-            response.status,
-            text
-        );
-
-
-        setSyncStatus(
-            "Supabase function error",
-            "error"
-        );
-
-
-        return false;
-
-
-    }catch(error){
-
-        console.error(
-            "SUPABASE CONNECTION ERROR:",
-            error
-        );
-
-
-        setSyncStatus(
-            "Supabase connection failed",
-            "error"
-        );
-
-
-        return false;
 
     }
 
@@ -773,66 +977,64 @@ async function testSupabaseFunction(){
 
 
 /* =========================================================
-   LOCAL STORAGE
+   DEFAULT START TIME
 ========================================================= */
 
-function saveState(){
+function setCurrentTime() {
 
-    try{
+    const now = new Date();
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(state)
-        );
+    const hours =
+        String(
+            now.getHours()
+        ).padStart(2, "0");
 
-    }catch(error){
+    const minutes =
+        String(
+            now.getMinutes()
+        ).padStart(2, "0");
 
-        console.error(
-            "Storage error:",
-            error
-        );
+    startTimeInput.value =
+        `${hours}:${minutes}`;
+}
 
-    }
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function saveState() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
+    );
 
 }
 
 
-function loadState(){
+function loadState() {
 
-    try{
+    try {
 
         const saved =
             localStorage.getItem(
                 STORAGE_KEY
             );
 
-
-        if(!saved){
-
-            return;
-
-        }
-
+        if (!saved) return;
 
         const parsed =
             JSON.parse(saved);
 
-
         state = {
-
             ...state,
-
             ...parsed
-
         };
 
+    } catch (error) {
 
-    }catch(error){
-
-        console.error(
-            "Load state error:",
-            error
-        );
+        console.error(error);
 
     }
 
@@ -840,17 +1042,10 @@ function loadState(){
 
 
 /* =========================================================
-   TIME
+   FORMAT
 ========================================================= */
 
-function getNow(){
-
-    return Date.now();
-
-}
-
-
-function formatTime(seconds){
+function formatTime(seconds) {
 
     seconds =
         Math.max(
@@ -858,40 +1053,31 @@ function formatTime(seconds){
             Math.floor(seconds)
         );
 
-
     const hours =
         Math.floor(
             seconds / 3600
         );
 
-
     const minutes =
         Math.floor(
             (seconds % 3600) / 60
         );
-
 
     const secs =
         seconds % 60;
 
-
-    return [
-
-        String(hours)
-            .padStart(2,"0"),
-
-        String(minutes)
-            .padStart(2,"0"),
-
-        String(secs)
-            .padStart(2,"0")
-
-    ].join(":");
+    return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
 
 }
 
 
-function formatShortTime(seconds){
+function formatShortTime(seconds) {
 
     seconds =
         Math.max(
@@ -899,47 +1085,125 @@ function formatShortTime(seconds){
             Math.floor(seconds)
         );
 
-
     const hours =
         Math.floor(
             seconds / 3600
         );
-
 
     const minutes =
         Math.floor(
             (seconds % 3600) / 60
         );
 
-
-    return [
-
-        String(hours)
-            .padStart(2,"0"),
-
-        String(minutes)
-            .padStart(2,"0")
-
-    ].join(":");
+    return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        String(minutes).padStart(2, "0")
+    );
 
 }
 
 
 /* =========================================================
-   SHIFT
+   START SHIFT USING SELECTED TIME
 ========================================================= */
 
-function startShift(){
+function startShiftWithSelectedTime() {
 
-    if(state.shiftActive){
+    const time =
+        startTimeInput.value;
+
+    if (!time) {
+
+        alert(
+            "Please select a start time."
+        );
+
+        return;
+
+    }
+
+    const [
+        hours,
+        minutes
+    ] =
+        time.split(":")
+            .map(Number);
+
+
+    const now =
+        new Date();
+
+    const start =
+        new Date();
+
+    start.setHours(
+        hours,
+        minutes,
+        0,
+        0
+    );
+
+
+    /*
+       If the selected time is in the future,
+       don't allow it accidentally.
+    */
+
+    if (start > now) {
+
+        alert(
+            "The start time cannot be in the future."
+        );
 
         return;
 
     }
 
 
-    const now =
-        getNow();
+    startShift(
+        start.getTime()
+    );
+
+}
+
+
+/* =========================================================
+   START NOW
+========================================================= */
+
+function startShiftNow() {
+
+    startShift(
+        Date.now()
+    );
+
+}
+
+
+/* =========================================================
+   START SHIFT
+========================================================= */
+
+function startShift(timestamp) {
+
+    if (state.shiftActive) {
+
+        return;
+
+    }
+
+
+    /* Ask for notification permission right away —
+       this must happen inside a click handler */
+
+    requestNotificationPermission();
+
+
+    const selectedLimit =
+        Number(
+            workPeriodSelect.value
+        );
 
 
     state.shiftActive =
@@ -949,30 +1213,41 @@ function startShift(){
         false;
 
     state.shiftStart =
-        now;
+        timestamp;
 
     state.workPeriodStart =
-        now;
+        timestamp;
 
     state.breakStart =
         null;
 
+    state.workLimitSeconds =
+        selectedLimit * 60;
+
     state.totalWorkedBeforeCurrentPeriod =
         0;
+
+    notifiedWarning =
+        false;
+
+    notifiedDanger =
+        false;
 
 
     saveState();
 
     updateUI();
 
-    requestWakeLock();
-
 }
 
 
-function stopShift(){
+/* =========================================================
+   END SHIFT
+========================================================= */
 
-    if(!state.shiftActive){
+function stopShift() {
+
+    if (!state.shiftActive) {
 
         return;
 
@@ -980,70 +1255,61 @@ function stopShift(){
 
 
     const now =
-        getNow();
+        Date.now();
 
 
-    let workedSeconds =
+    let worked =
         state.totalWorkedBeforeCurrentPeriod;
 
 
-    if(!state.breakActive){
+    if (!state.breakActive) {
 
-        workedSeconds +=
+        worked +=
             Math.max(
-
                 0,
-
                 Math.floor(
-
                     (
                         now -
                         state.workPeriodStart
                     ) / 1000
-
                 )
-
             );
 
     }
 
 
-    const date =
+    const startDate =
         new Date(
             state.shiftStart
-        ).toLocaleDateString(
-            "en-GB",
-            {
-                day:"2-digit",
-                month:"2-digit",
-                year:"numeric"
-            }
         );
 
 
     state.history.unshift({
 
-        date:date,
+        date:
+            startDate.toLocaleDateString(
+                "en-GB"
+            ),
 
         start:
-            new Date(
-                state.shiftStart
-            ).toLocaleTimeString(
+            startDate.toLocaleTimeString(
                 "en-GB",
                 {
-                    hour:"2-digit",
-                    minute:"2-digit"
+                    hour: "2-digit",
+                    minute: "2-digit"
                 }
             ),
 
-        worked:workedSeconds
+        worked:
+            worked
 
     });
 
 
-    if(
-        state.history.length > 30
-    ){
+    if (
+        state.history.length >
+        30
+    ) {
 
         state.history =
             state.history.slice(
@@ -1072,22 +1338,56 @@ function stopShift(){
     state.totalWorkedBeforeCurrentPeriod =
         0;
 
+    notifiedWarning =
+        false;
+
+    notifiedDanger =
+        false;
+
 
     saveState();
 
     updateUI();
 
+}
 
-    if(wakeLock){
 
-        wakeLock
-            .release()
-            .catch(()=>{});
+/* =========================================================
+   WORK TIME
+========================================================= */
 
-        wakeLock =
-            null;
+function getCurrentWorkSeconds() {
+
+    if (
+        !state.shiftActive ||
+        state.breakActive
+    ) {
+
+        return 0;
 
     }
+
+
+    return Math.max(
+        0,
+        Math.floor(
+            (
+                Date.now() -
+                state.workPeriodStart
+            ) / 1000
+        )
+    );
+
+}
+
+
+function getRemainingSeconds() {
+
+    return Math.max(
+        0,
+        state.workLimitSeconds -
+        getCurrentWorkSeconds()
+    );
 
 }
 
@@ -1096,23 +1396,32 @@ function stopShift(){
    BREAK
 ========================================================= */
 
-function startBreak(){
+function startBreak() {
 
-    if(
+    if (
         !state.shiftActive ||
         state.breakActive
-    ){
+    ) {
 
         return;
 
     }
 
 
+    /*
+       Save the amount of working time
+       already completed before the break.
+    */
+
+    state.totalWorkedBeforeCurrentPeriod +=
+        getCurrentWorkSeconds();
+
+
     state.breakActive =
         true;
 
     state.breakStart =
-        getNow();
+        Date.now();
 
 
     saveState();
@@ -1122,34 +1431,32 @@ function startBreak(){
 }
 
 
-function endBreak(){
+/* =========================================================
+   END BREAK
+========================================================= */
 
-    if(!state.breakActive){
+function endBreak() {
+
+    if (!state.breakActive) {
 
         return;
 
     }
 
 
-    const now =
-        getNow();
-
-
     const breakSeconds =
         Math.floor(
-
             (
-                now -
+                Date.now() -
                 state.breakStart
             ) / 1000
-
         );
 
 
-    if(
+    if (
         breakSeconds <
         MIN_BREAK
-    ){
+    ) {
 
         alert(
             "The break has not reached 15 minutes yet."
@@ -1160,6 +1467,11 @@ function endBreak(){
     }
 
 
+    /*
+       A qualifying break starts
+       a new working period.
+    */
+
     state.breakActive =
         false;
 
@@ -1167,7 +1479,13 @@ function endBreak(){
         null;
 
     state.workPeriodStart =
-        now;
+        Date.now();
+
+    notifiedWarning =
+        false;
+
+    notifiedDanger =
+        false;
 
 
     saveState();
@@ -1178,63 +1496,15 @@ function endBreak(){
 
 
 /* =========================================================
-   WORK TIMER
+   BREAK TIME
 ========================================================= */
 
-function getCurrentWorkSeconds(){
+function getBreakSeconds() {
 
-    if(
-        !state.shiftActive ||
-        state.breakActive
-    ){
-
-        return 0;
-
-    }
-
-
-    return Math.max(
-
-        0,
-
-        Math.floor(
-
-            (
-                getNow() -
-                state.workPeriodStart
-            ) / 1000
-
-        )
-
-    );
-
-}
-
-
-function getRemainingWorkSeconds(){
-
-    return Math.max(
-
-        0,
-
-        WORK_LIMIT -
-        getCurrentWorkSeconds()
-
-    );
-
-}
-
-
-/* =========================================================
-   BREAK TIMER
-========================================================= */
-
-function getBreakSeconds(){
-
-    if(
+    if (
         !state.breakActive ||
         !state.breakStart
-    ){
+    ) {
 
         return 0;
 
@@ -1242,31 +1512,62 @@ function getBreakSeconds(){
 
 
     return Math.max(
-
         0,
-
         Math.floor(
-
             (
-                getNow() -
+                Date.now() -
                 state.breakStart
             ) / 1000
-
         )
-
     );
 
 }
 
 
 /* =========================================================
-   DAILY WORK
+   BREAK DUE CLOCK
 ========================================================= */
 
-function getTodayWorkedSeconds(){
+function getBreakDueTime() {
+
+    if (
+        !state.shiftActive ||
+        !state.workPeriodStart
+    ) {
+
+        return "--:--";
+
+    }
+
+
+    const due =
+        new Date(
+            state.workPeriodStart +
+            (
+                state.workLimitSeconds *
+                1000
+            )
+        );
+
+
+    return due.toLocaleTimeString(
+        "en-GB",
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+function getTodayWorkedSeconds() {
 
     let total = 0;
-
 
     const today =
         new Date()
@@ -1278,9 +1579,9 @@ function getTodayWorkedSeconds(){
     state.history.forEach(
         item => {
 
-            if(
+            if (
                 item.date === today
-            ){
+            ) {
 
                 total +=
                     item.worked;
@@ -1291,13 +1592,22 @@ function getTodayWorkedSeconds(){
     );
 
 
-    if(
-        state.shiftActive &&
-        !state.breakActive
-    ){
+    if (
+        state.shiftActive
+    ) {
 
         total +=
-            getCurrentWorkSeconds();
+            state.totalWorkedBeforeCurrentPeriod;
+
+
+        if (
+            !state.breakActive
+        ) {
+
+            total +=
+                getCurrentWorkSeconds();
+
+        }
 
     }
 
@@ -1308,70 +1618,70 @@ function getTodayWorkedSeconds(){
 
 
 /* =========================================================
-   UI
+   UPDATE UI
 ========================================================= */
 
-function updateUI(){
+function updateUI() {
 
     const mainTimer =
         document.getElementById(
             "mainTimer"
         );
 
-
     const mainStatus =
         document.getElementById(
             "mainStatus"
         );
-
 
     const progressBar =
         document.getElementById(
             "progressBar"
         );
 
-
-    const startButton =
-        document.getElementById(
-            "startButton"
-        );
-
-
     const breakButton =
         document.getElementById(
             "breakButton"
         );
-
 
     const stopButton =
         document.getElementById(
             "stopButton"
         );
 
-
     const breakCard =
         document.getElementById(
             "breakCard"
         );
-
 
     const statusDot =
         document.getElementById(
             "statusDot"
         );
 
+    const setupCard =
+        document.getElementById(
+            "setupCard"
+        );
 
     const shiftStart =
         document.getElementById(
             "shiftStart"
         );
 
+    const breakDue =
+        document.getElementById(
+            "breakDue"
+        );
 
     const dailyHours =
         document.getElementById(
             "dailyHours"
         );
 
+    const selectedPeriod =
+        document.getElementById(
+            "selectedPeriod"
+        );
 
     const notice =
         document.getElementById(
@@ -1379,12 +1689,35 @@ function updateUI(){
         );
 
 
-    /* NOT STARTED */
+    updateNotifyBanner();
 
-    if(!state.shiftActive){
+
+    selectedPeriod.textContent =
+        formatShortTime(
+            state.workLimitSeconds
+        );
+
+
+    dailyHours.textContent =
+        formatShortTime(
+            getTodayWorkedSeconds()
+        );
+
+
+    /* NOT ACTIVE */
+
+    if (!state.shiftActive) {
+
+        setupCard.classList.remove(
+            "hidden"
+        );
 
         mainTimer.textContent =
-            "06:00:00";
+            formatTime(
+                Number(
+                    workPeriodSelect.value
+                ) * 60
+            );
 
         mainTimer.className =
             "main-timer timer-green";
@@ -1397,9 +1730,6 @@ function updateUI(){
 
         progressBar.style.width =
             "0%";
-
-        startButton.style.display =
-            "block";
 
         breakButton.style.display =
             "none";
@@ -1418,13 +1748,12 @@ function updateUI(){
         shiftStart.textContent =
             "--:--";
 
-        dailyHours.textContent =
-            formatShortTime(
-                getTodayWorkedSeconds()
-            );
+        breakDue.textContent =
+            "--:--";
 
-        notice.className =
-            "notice";
+        notice.classList.remove(
+            "visible"
+        );
 
         renderHistory();
 
@@ -1433,13 +1762,15 @@ function updateUI(){
     }
 
 
+    /* ACTIVE */
+
+    setupCard.classList.add(
+        "hidden"
+    );
+
     statusDot.classList.add(
         "active"
     );
-
-
-    startButton.style.display =
-        "none";
 
     stopButton.style.display =
         "block";
@@ -1451,15 +1782,27 @@ function updateUI(){
         ).toLocaleTimeString(
             "en-GB",
             {
-                hour:"2-digit",
-                minute:"2-digit"
+                hour: "2-digit",
+                minute: "2-digit"
             }
         );
 
 
-    /* BREAK */
+    breakDue.textContent =
+        getBreakDueTime();
 
-    if(state.breakActive){
+
+    /* BREAK ACTIVE */
+
+    if (state.breakActive) {
+
+        breakCard.classList.add(
+            "visible"
+        );
+
+        breakButton.style.display =
+            "none";
+
 
         const breakSeconds =
             getBreakSeconds();
@@ -1470,18 +1813,15 @@ function updateUI(){
                 "breakTimer"
             );
 
-
         const breakMessage =
             document.getElementById(
                 "breakMessage"
             );
 
-
         const breakProgress =
             document.getElementById(
                 "breakProgressBar"
             );
-
 
         const endBreakButton =
             document.getElementById(
@@ -1489,27 +1829,19 @@ function updateUI(){
             );
 
 
-        breakCard.classList.add(
-            "visible"
-        );
-
-
         breakTimer.textContent =
             formatTime(
                 breakSeconds
-            ).substring(3);
+            );
 
 
         const percent =
             Math.min(
-
                 100,
-
                 (
                     breakSeconds /
                     MIN_BREAK
                 ) * 100
-
             );
 
 
@@ -1517,18 +1849,18 @@ function updateUI(){
             percent + "%";
 
 
-        if(
+        if (
             breakSeconds >=
             MIN_BREAK
-        ){
+        ) {
 
             breakMessage.textContent =
-                "15-minute qualifying break reached.";
+                "✓ 15-minute qualifying break reached.";
 
             endBreakButton.disabled =
                 false;
 
-        }else{
+        } else {
 
             breakMessage.textContent =
                 "Qualifying break in " +
@@ -1558,16 +1890,9 @@ function updateUI(){
         progressBar.style.width =
             "0%";
 
-        breakButton.style.display =
-            "none";
-
-        notice.className =
-            "notice";
-
-        dailyHours.textContent =
-            formatShortTime(
-                getTodayWorkedSeconds()
-            );
+        notice.classList.remove(
+            "visible"
+        );
 
         return;
 
@@ -1580,13 +1905,12 @@ function updateUI(){
         "visible"
     );
 
-
     breakButton.style.display =
         "block";
 
 
     const remaining =
-        getRemainingWorkSeconds();
+        getRemainingSeconds();
 
 
     const worked =
@@ -1599,26 +1923,30 @@ function updateUI(){
         );
 
 
-    progressBar.style.width =
+    const percent =
         Math.min(
-
             100,
-
             (
                 worked /
-                WORK_LIMIT
+                state.workLimitSeconds
             ) * 100
-
-        ) + "%";
-
-
-    notice.className =
-        "notice";
+        );
 
 
-    if(
+    progressBar.style.width =
+        percent + "%";
+
+
+    notice.classList.remove(
+        "visible",
+        "warning",
+        "danger"
+    );
+
+
+    if (
         remaining <= 0
-    ){
+    ) {
 
         mainTimer.className =
             "main-timer timer-red";
@@ -1630,15 +1958,29 @@ function updateUI(){
             "status danger";
 
         notice.textContent =
-            "⚠️ 6 HOURS REACHED — TAKE YOUR REQUIRED BREAK";
+            "⚠️ WORKING PERIOD REACHED — TAKE YOUR REQUIRED BREAK";
 
-        notice.className =
-            "notice visible danger";
+        notice.classList.add(
+            "visible",
+            "danger"
+        );
 
-    }else if(
-        remaining <=
-        WARNING_TIME
-    ){
+        if (!notifiedDanger) {
+
+            sendNotification(
+                "Break required now",
+                "You've reached your working-period limit. Take your break."
+            );
+
+            notifiedDanger = true;
+
+        }
+
+    }
+
+    else if (
+        remaining <= WARNING_TIME
+    ) {
 
         mainTimer.className =
             "main-timer timer-orange";
@@ -1650,29 +1992,38 @@ function updateUI(){
             "status warning";
 
         notice.textContent =
-            "⚠️ Your 6-hour working period is nearly complete.";
+            "⚠️ Your working-period limit is approaching.";
 
-        notice.className =
-            "notice visible warning";
+        notice.classList.add(
+            "visible",
+            "warning"
+        );
 
-    }else{
+        if (!notifiedWarning) {
+
+            sendNotification(
+                "Break due soon",
+                "30 minutes left before your working-period limit."
+            );
+
+            notifiedWarning = true;
+
+        }
+
+    }
+
+    else {
 
         mainTimer.className =
             "main-timer timer-green";
 
         mainStatus.textContent =
-            "SAFE — BREAK NOT YET REQUIRED";
+            "SAFE — WORKING";
 
         mainStatus.className =
             "status safe";
 
     }
-
-
-    dailyHours.textContent =
-        formatShortTime(
-            getTodayWorkedSeconds()
-        );
 
 
     renderHistory();
@@ -1684,7 +2035,7 @@ function updateUI(){
    HISTORY
 ========================================================= */
 
-function renderHistory(){
+function renderHistory() {
 
     const history =
         document.getElementById(
@@ -1692,15 +2043,17 @@ function renderHistory(){
         );
 
 
-    if(
+    if (
         !state.history ||
         state.history.length === 0
-    ){
+    ) {
 
         history.innerHTML =
-            '<div class="history-empty">' +
-            'No completed shifts yet.' +
-            '</div>';
+            `
+            <div class="history-empty">
+                No completed shifts yet.
+            </div>
+            `;
 
         return;
 
@@ -1708,40 +2061,40 @@ function renderHistory(){
 
 
     history.innerHTML =
-        state.history
-            .map(item => `
+        state.history.map(
+            item => {
 
-                <div class="history-item">
+                return `
+                    <div class="history-item">
 
-                    <div>
+                        <div>
 
-                        <div class="history-date">
-                            ${item.date}
+                            <div class="history-date">
+                                ${item.date}
+                            </div>
+
+                            <div
+                                style="
+                                font-size:12px;
+                                color:#71849a;
+                                "
+                            >
+                                Started ${item.start}
+                            </div>
+
                         </div>
 
-                        <div style="
-                            font-size:12px;
-                            color:#71849a;
-                        ">
-
-                            Started ${item.start}
-
+                        <div class="history-hours">
+                            ${formatShortTime(
+                                item.worked
+                            )}
                         </div>
 
                     </div>
+                `;
 
-                    <div class="history-hours">
-
-                        ${formatShortTime(
-                            item.worked
-                        )}
-
-                    </div>
-
-                </div>
-
-            `)
-            .join("");
+            }
+        ).join("");
 
 }
 
@@ -1750,13 +2103,13 @@ function renderHistory(){
    CLEAR HISTORY
 ========================================================= */
 
-function clearHistory(){
+function clearHistory() {
 
-    if(
+    if (
         !confirm(
             "Delete all shift history?"
         )
-    ){
+    ) {
 
         return;
 
@@ -1765,10 +2118,7 @@ function clearHistory(){
 
     state.history = [];
 
-
     saveState();
-
-    renderHistory();
 
     updateUI();
 
@@ -1776,61 +2126,33 @@ function clearHistory(){
 
 
 /* =========================================================
-   WAKE LOCK
+   CHANGE WORK PERIOD BEFORE START
 ========================================================= */
 
-let wakeLock = null;
+workPeriodSelect.addEventListener(
+    "change",
+    function() {
 
+        if (!state.shiftActive) {
 
-async function requestWakeLock(){
+            const seconds =
+                Number(
+                    this.value
+                ) * 60;
 
-    try{
-
-        if(
-            "wakeLock" in navigator &&
-            !wakeLock &&
-            state.shiftActive
-        ){
-
-            wakeLock =
-                await navigator.wakeLock.request(
-                    "screen"
+            document.getElementById(
+                "mainTimer"
+            ).textContent =
+                formatTime(
+                    seconds
                 );
 
-        }
-
-    }catch(error){
-
-        console.log(
-            "Wake Lock unavailable",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PAGE VISIBILITY
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    async function(){
-
-        if(!document.hidden){
-
-            updateUI();
-
-
-            if(
-                state.shiftActive
-            ){
-
-                await requestWakeLock();
-
-            }
+            document.getElementById(
+                "selectedPeriod"
+            ).textContent =
+                formatShortTime(
+                    seconds
+                );
 
         }
 
@@ -1839,10 +2161,25 @@ document.addEventListener(
 
 
 /* =========================================================
-   START APP
+   STARTUP
 ========================================================= */
 
+setCurrentTime();
+
 loadState();
+
+
+if (
+    state.shiftActive
+) {
+
+    workPeriodSelect.value =
+        String(
+            state.workLimitSeconds / 60
+        );
+
+}
+
 
 updateUI();
 
@@ -1852,24 +2189,85 @@ updateUI();
 ========================================================= */
 
 setInterval(
-
-    function(){
-
-        updateUI();
-
-    },
-
+    updateUI,
     1000
-
 );
 
 
 /* =========================================================
-   TEST SUPABASE
-   IMPORTANT: THIS LINE WAS MISSING
+   PHONE SCREEN WAKE LOCK
 ========================================================= */
 
-testSupabaseFunction();
+let wakeLock = null;
+
+
+async function requestWakeLock() {
+
+    try {
+
+        if (
+            "wakeLock" in navigator &&
+            !wakeLock
+        ) {
+
+            wakeLock =
+                await navigator.wakeLock.request(
+                    "screen"
+                );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Wake Lock unavailable"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   VISIBILITY
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    async function() {
+
+        if (
+            !document.hidden &&
+            state.shiftActive
+        ) {
+
+            await requestWakeLock();
+
+            updateUI();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   REQUEST WAKE LOCK WHEN STARTING
+========================================================= */
+
+const originalStart =
+    startShift;
+
+
+startShift = function(timestamp) {
+
+    originalStart(timestamp);
+
+    requestWakeLock();
+
+};
 
 </script>
 
