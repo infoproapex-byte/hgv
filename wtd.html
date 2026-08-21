@@ -838,6 +838,118 @@ if ("serviceWorker" in navigator) {
 
 
 /* =========================================================
+   SOUND ALERT
+========================================================= */
+
+let audioCtx = null;
+
+
+function unlockAudio() {
+
+    try {
+
+        if (!audioCtx) {
+
+            audioCtx = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+        }
+
+        if (audioCtx.state === "suspended") {
+
+            audioCtx.resume();
+
+        }
+
+    } catch (e) {
+
+        console.log(
+            "Audio unlock failed:",
+            e
+        );
+
+    }
+
+}
+
+
+function playBeep(times) {
+
+    if (!audioCtx) {
+
+        return;
+
+    }
+
+    if (audioCtx.state === "suspended") {
+
+        audioCtx.resume();
+
+    }
+
+
+    const count =
+        times || 1;
+
+
+    for (let i = 0; i < count; i++) {
+
+        const startTime =
+            audioCtx.currentTime +
+            (i * 0.35);
+
+
+        const oscillator =
+            audioCtx.createOscillator();
+
+        const gain =
+            audioCtx.createGain();
+
+
+        oscillator.type =
+            "sine";
+
+        oscillator.frequency.setValueAtTime(
+            880,
+            startTime
+        );
+
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            startTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.5,
+            startTime + 0.02
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            startTime + 0.25
+        );
+
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioCtx.destination
+        );
+
+
+        oscillator.start(startTime);
+
+        oscillator.stop(startTime + 0.25);
+
+    }
+
+}
+
+
+/* =========================================================
    NOTIFICATIONS
 ========================================================= */
 
@@ -1198,6 +1310,11 @@ function startShift(timestamp) {
        this must happen inside a click handler */
 
     requestNotificationPermission();
+
+    /* Unlock the sound alert — must also happen inside
+       a click handler, otherwise iOS blocks audio later */
+
+    unlockAudio();
 
 
     const selectedLimit =
@@ -1972,6 +2089,8 @@ function updateUI() {
                 "You've reached your working-period limit. Take your break."
             );
 
+            playBeep(3);
+
             notifiedDanger = true;
 
         }
@@ -2005,6 +2124,8 @@ function updateUI() {
                 "Break due soon",
                 "30 minutes left before your working-period limit."
             );
+
+            playBeep(1);
 
             notifiedWarning = true;
 
