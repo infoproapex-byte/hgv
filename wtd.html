@@ -529,7 +529,7 @@ button:active {
                     Up to 6 hours — No specific work break
                 </option>
 
-                <option value="540" data-break="30" selected>
+                <option value="360" data-break="30" selected>
                     6 to 9 hours — 30 minutes total break
                 </option>
 
@@ -2743,15 +2743,15 @@ if (
 
     if (oldMinutes <= 360) {
         workPeriodSelect.value = "360";
-    } else if (oldMinutes <= 540) {
-        workPeriodSelect.value = "540";
+    } else if (oldMinutes <= 360) {
+        workPeriodSelect.value = "360";
     } else {
         workPeriodSelect.value = "600";
     }
 
 } else {
 
-    workPeriodSelect.value = "540";
+    workPeriodSelect.value = "360";
 
 }
 
